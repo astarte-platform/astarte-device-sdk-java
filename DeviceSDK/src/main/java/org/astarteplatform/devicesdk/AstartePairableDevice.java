@@ -1,0 +1,255 @@
+package org.astarteplatform.devicesdk;
+
+import org.astarteplatform.devicesdk.crypto.AstarteCryptoException;
+import org.astarteplatform.devicesdk.crypto.AstarteCryptoStore;
+import org.astarteplatform.devicesdk.protocol.AstarteInterface;
+import org.astarteplatform.devicesdk.protocol.AstarteInvalidInterfaceException;
+import org.astarteplatform.devicesdk.transport.AstarteFailedMessageStorage;
+import org.astarteplatform.devicesdk.transport.AstarteTransport;
+import org.astarteplatform.devicesdk.transport.AstarteTransportEventListener;
+import org.astarteplatform.devicesdk.transport.AstarteTransportException;
+import org.json.JSONException;
+
+public abstract class AstartePairableDevice extends AstarteDevice
+    implements AstarteTransportEventListener {
+  private AstartePairingHandler mPairingHandler;
+  private AstarteTransport mAstarteTransport = null;
+  private AstarteMessageListener mAstarteMessageListener = null;
+  private boolean mInitialized = false;
+  private boolean mExplicitDisconnectionRequest = false;
+  private java.util.Timer mReconnectTimer = null;
+
+  protected AstartePairableDevice(
+      AstartePairingHandler pairingHandler,
+      AstartePropertyStorage propertyStorage,
+      AstarteFailedMessageStorage failedMessageStorage,
+      AstarteInterfaceProvider interfaceProvider)
+      throws JSONException, AstarteInvalidInterfaceException {
+    super(interfaceProvider, propertyStorage, failedMessageStorage);
+    mPairingHandler = pairingHandler;
+  }
+
+  private void init() throws AstartePairingException {
+    mPairingHandler.init();
+    // Get and configure the first available transport
+    setFirstTransportFromPairingHandler();
+  }
+
+  @Override
+  public String getDeviceId() {
+    return mPairingHandler.getDeviceId();
+  }
+
+  @Override
+  public String getAstarteRealm() {
+    return mPairingHandler.getAstarteRealm();
+  }
+
+  public AstarteCryptoStore getCryptoStore() {
+    return mPairingHandler.m_cryptoStore;
+  }
+
+  public AstarteTransport getAstarteTransport() {
+    return mAstarteTransport;
+  }
+
+  public void setAstarteTransport(AstarteTransport astarteTransport) {
+    this.mAstarteTransport = astarteTransport;
+    configureTransport();
+  }
+
+  @Override
+  public AstarteMessageListener getAstarteMessageListener() {
+    return mAstarteMessageListener;
+  }
+
+  @Override
+  public void setAstarteMessageListener(AstarteMessageListener astarteMessageListener) {
+    this.mAstarteMessageListener = astarteMessageListener;
+    if (mAstarteTransport != null && astarteMessageListener != null) {
+      mAstarteTransport.setMessageListener(astarteMessageListener);
+    }
+  }
+
+  private boolean eventuallyReconnect() {
+    synchronized (this) {
+      if (alwaysReconnects() && mReconnectTimer == null) {
+        mReconnectTimer = new java.util.Timer();
+        // Retry in 5 seconds, and after 15 seconds
+        mReconnectTimer.schedule(
+            new java.util.TimerTask() {
+              @Override
+              public void run() {
+                try {
+                  connect();
+                } catch (Exception e) {
+                  mAstarteMessageListener.onFailure(e);
+                }
+              }
+            },
+            5000,
+            15000);
+        return true;
+      }
+
+      mExplicitDisconnectionRequest = false;
+      return false;
+    }
+  }
+
+  @Override
+  public void connect()
+      throws AstarteTransportException, AstarteCryptoException, AstartePairingException {
+    synchronized (this) {
+      if (!mInitialized) {
+        try {
+          init();
+        } catch (Exception e) {
+          if (!eventuallyReconnect()) {
+            throw e;
+          }
+          return;
+        }
+        mInitialized = true;
+      }
+
+      if (isConnected()) {
+        return;
+      }
+
+      try {
+        mAstarteTransport.connect();
+      } catch (AstarteCryptoException e) {
+        System.err.println("Regenerating the cert");
+        // Generate the certificate and try again
+        try {
+          mPairingHandler.requestNewCertificate();
+        } catch (AstartePairingException ex) {
+          onTransportConnectionError(ex);
+          return;
+        }
+        if (!eventuallyReconnect()) {
+          // Try connecting again (don't catch this time)
+          mAstarteTransport.connect();
+        }
+      }
+    }
+  }
+
+  @Override
+  public void disconnect() throws AstarteTransportException {
+    synchronized (this) {
+      if (mReconnectTimer != null) {
+        mExplicitDisconnectionRequest = true;
+      }
+
+      if (!isConnected()) {
+        return;
+      }
+
+      mExplicitDisconnectionRequest = true;
+      mAstarteTransport.disconnect();
+    }
+  }
+
+  @Override
+  public boolean isConnected() {
+    try {
+      return mAstarteTransport.isConnected();
+    } catch (NullPointerException e) {
+      return false;
+    }
+  }
+
+  @Override
+  public void onTransportConnected() {
+    synchronized (this) {
+      if (mAstarteMessageListener != null) {
+        mAstarteMessageListener.onConnected();
+      }
+      if (mReconnectTimer != null) {
+        mReconnectTimer.cancel();
+        mReconnectTimer = null;
+      }
+    }
+  }
+
+  @Override
+  public void onTransportConnectionError(Throwable cause) {
+    synchronized (this) {
+      if (cause instanceof AstarteCryptoException) {
+        System.err.println("Regenerating the cert");
+        // Generate the certificate and try again
+        try {
+          mPairingHandler.requestNewCertificate();
+
+          setFirstTransportFromPairingHandler();
+        } catch (AstartePairingException e) {
+          if (!eventuallyReconnect()) {
+            mAstarteMessageListener.onFailure(e);
+            e.printStackTrace();
+          }
+          return;
+        }
+
+        // If we got this, connect again anyway
+        try {
+          mAstarteTransport.connect();
+        } catch (Exception e) {
+          // Unrecoverable
+          if (mAstarteMessageListener != null) {
+            mAstarteMessageListener.onFailure(e);
+          } else {
+            e.printStackTrace();
+          }
+        }
+      } else {
+        if (!eventuallyReconnect()) {
+          if (mAstarteMessageListener != null) {
+            mAstarteMessageListener.onFailure(cause);
+          }
+        }
+      }
+    }
+  }
+
+  @Override
+  public void onTransportDisconnected() {
+    synchronized (this) {
+      if (mAstarteMessageListener != null) {
+        mAstarteMessageListener.onDisconnected(null);
+      }
+
+      if (alwaysReconnects() && !mExplicitDisconnectionRequest) {
+        // Reconnect
+        eventuallyReconnect();
+      }
+
+      mExplicitDisconnectionRequest = false;
+    }
+  }
+
+  private void setFirstTransportFromPairingHandler() throws AstartePairingException {
+    mAstarteTransport = mPairingHandler.getTransports().get(0);
+    if (mAstarteTransport == null) {
+      throw new AstartePairingException(
+          "Astarte returned no supported transports " + "for the Device!");
+    }
+    configureTransport();
+  }
+
+  private void configureTransport() {
+    mAstarteTransport.setDevice(this);
+    mAstarteTransport.setPropertyStorage(mPropertyStorage);
+    mAstarteTransport.setFailedMessageStorage(mFailedMessageStorage);
+    mAstarteTransport.setAstarteTransportEventListener(this);
+    if (mAstarteMessageListener != null) {
+      mAstarteTransport.setMessageListener(mAstarteMessageListener);
+    }
+
+    // Set transport on all interfaces
+    for (AstarteInterface astarteInterface : getAllInterfaces()) {
+      astarteInterface.setAstarteTransport(mAstarteTransport);
+    }
+  }
+}

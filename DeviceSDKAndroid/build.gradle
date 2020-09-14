@@ -1,0 +1,111 @@
+apply plugin: 'com.android.library'
+apply plugin: 'maven-publish'
+
+android {
+    compileSdkVersion 29
+    buildToolsVersion "29.0.2"
+
+
+    defaultConfig {
+        minSdkVersion 23
+        targetSdkVersion 29
+        versionCode 1
+        versionName "1.0"
+
+        testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
+
+        javaCompileOptions {
+            annotationProcessorOptions {
+                arguments = ["room.schemaLocation": "$projectDir/schemas".toString()]
+            }
+        }
+    }
+
+    buildTypes {
+        release {
+            minifyEnabled false
+            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+        }
+    }
+
+    packagingOptions {
+        exclude 'META-INF/DEPENDENCIES'
+        exclude 'META-INF/LICENSE'
+        exclude 'META-INF/LICENSE.txt'
+        exclude 'META-INF/license.txt'
+        exclude 'META-INF/NOTICE'
+        exclude 'META-INF/NOTICE.txt'
+        exclude 'META-INF/notice.txt'
+        exclude 'META-INF/ASL2.0'
+    }
+    lintOptions {
+        disable 'InvalidPackage'
+    }
+
+    dependencies {
+        implementation project(':DeviceSDK')
+
+        implementation 'org.eclipse.paho:org.eclipse.paho.android.service:1.1.1'
+
+        def room_version = "2.2.5"
+        implementation "androidx.room:room-runtime:$room_version"
+        annotationProcessor "androidx.room:room-compiler:$room_version"
+        androidTestImplementation "androidx.room:room-testing:$room_version"
+    }
+}
+
+repositories {
+    maven {
+        url "https://repo.eclipse.org/content/repositories/paho-releases/"
+    }
+}
+
+dependencies {
+    implementation 'androidx.appcompat:appcompat:1.0.2'
+    testImplementation 'junit:junit:4.12'
+    androidTestImplementation 'androidx.test:runner:1.2.0'
+    androidTestImplementation 'androidx.test.espresso:espresso-core:3.2.0'
+
+    androidTestImplementation 'org.mongodb:bson:3.11.0'
+    androidTestImplementation 'com.squareup.okhttp3:okhttp:4.1.0'
+}
+
+task androidSourcesJar(type: Jar) {
+    archiveClassifier = 'sources'
+    from android.sourceSets.main.java.srcDirs
+}
+
+publishing {
+    repositories {
+        maven {
+            url System.getenv('MAVEN_PUBLISH_URL')
+            credentials {
+                username System.getenv('MAVEN_PUBLISH_USERNAME')
+                password System.getenv('MAVEN_PUBLISH_PASSWORD')
+            }
+        }
+    }
+
+    publications {
+        aar(MavenPublication) {
+            groupId project.group
+            artifactId "androiddevicesdk"
+            version project.version
+
+            artifact("$buildDir/outputs/aar/${project.getName()}-release.aar")
+            artifact androidSourcesJar
+
+            pom.withXml {
+                def dependencies = asNode().appendNode("dependencies")
+                configurations.getByName("releaseRuntimeClasspath").getResolvedConfiguration()
+                        .getFirstLevelModuleDependencies().each {
+                    def dependency = dependencies.appendNode("dependency")
+                    dependency.appendNode("groupId", it.moduleGroup)
+                    dependency.appendNode("artifactId", it.moduleName)
+                    dependency.appendNode("version", it.moduleVersion)
+                    dependency.appendNode("scope", "runtime")
+                }
+            }
+        }
+    }
+}
