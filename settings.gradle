@@ -1,0 +1,3 @@
+include ':DeviceSDK'
+include ':DeviceSDKAndroid'
+include ':DeviceSDKGeneric'
