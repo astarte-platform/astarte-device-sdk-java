@@ -1,0 +1,18 @@
+apply plugin: 'com.diffplug.spotless'
+spotless {
+	if (project != rootProject) {
+		// the rootProject doesn't have any java
+		java {
+			// spotless can't deduce target in Android projects
+			// See https://github.com/diffplug/spotless/issues/111
+			target "src/*/java/**/*.java"
+
+			trimTrailingWhitespace()
+			googleJavaFormat('1.7')
+		}
+	}
+	groovyGradle {
+		target '*.gradle'
+		greclipse()
+	}
+}

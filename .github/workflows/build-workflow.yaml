@@ -1,0 +1,52 @@
+name: Build flow
+
+on:
+  push:
+    branches:
+    - 'master'
+    - 'release-*'
+  # Run on branch/tag creation
+  create:
+  # Run on pull requests
+  pull_request:
+
+jobs:
+  check-format:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: Set up JDK 11
+        uses: actions/setup-java@v1
+        with:
+          java-version: 11
+      - name: Check formatting
+        run: ./gradlew spotlessCheck
+
+  build:
+    runs-on: ubuntu-latest
+    strategy: 
+      matrix:
+        java: [8, 11]
+    steps:
+      - uses: actions/checkout@v2
+      - name: Set up JDK
+        uses: actions/setup-java@v1
+        with:
+          java-version: ${{ matrix.java }}
+      - name: Build with Gradle
+        run: ./gradlew build
+
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: Set up JDK 11
+        uses: actions/setup-java@v1
+        with:
+          java-version: 11
+      - name: Gradle lint
+        run: ./gradlew lint
+      - name: Read Android lint results
+        uses: yutailang0119/action-android-lint@v1.0.2
+        with:
+          xml_path: DeviceSDKAndroid/build/reports/lint-results.xml

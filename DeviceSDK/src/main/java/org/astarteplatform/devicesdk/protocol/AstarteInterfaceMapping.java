@@ -46,8 +46,7 @@ public class AstarteInterfaceMapping {
     mTypeCompatibilityList.add(stringCompatibilityList);
     mTypeCompatibilityList.add(dateTimeCompatibilityList);
     mTypeCompatibilityList.add(byteArrayCompatibilityList);
-  }
-  ;
+  };
 
   static AstarteInterfaceMapping fromJSON(JSONObject astarteMappingObject) throws JSONException {
     AstarteInterfaceMapping astarteInterfaceMapping = new AstarteInterfaceMapping();
