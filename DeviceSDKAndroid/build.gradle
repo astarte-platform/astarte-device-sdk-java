@@ -43,7 +43,7 @@ android {
 	}
 
 	dependencies {
-		implementation project(':DeviceSDK')
+		api project(':DeviceSDK')
 
 		implementation 'org.eclipse.paho:org.eclipse.paho.android.service:1.1.1'
 
