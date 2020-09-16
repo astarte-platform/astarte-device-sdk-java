@@ -12,7 +12,6 @@ import static org.eclipse.paho.client.mqttv3.MqttException.REASON_CODE_WRITE_TIM
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
-import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -60,7 +59,6 @@ import org.joda.time.DateTime;
 
 public class AstarteMqttV1Transport extends AstarteMqttTransport {
   private final String m_baseTopic;
-  private ArrayDeque<AstarteFailedMessage> mFailedMessages;
   private final BSONDecoder mBSONDecoder = new BasicBSONDecoder();
   private final BSONCallback mBSONCallback = new BasicBSONCallback();
   private final MqttCallback mMqttCallback =
