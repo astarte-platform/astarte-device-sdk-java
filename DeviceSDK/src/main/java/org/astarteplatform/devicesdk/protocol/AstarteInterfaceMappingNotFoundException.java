@@ -1,6 +1,6 @@
 package org.astarteplatform.devicesdk.protocol;
 
-class AstarteInterfaceMappingNotFoundException extends Exception {
+public class AstarteInterfaceMappingNotFoundException extends Exception {
   public AstarteInterfaceMappingNotFoundException(String message) {
     super(message);
   }

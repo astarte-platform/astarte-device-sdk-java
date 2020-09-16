@@ -18,27 +18,30 @@ public class AstarteGenericFailedMessageStorage implements AstarteFailedMessageS
     TableUtils.createTableIfNotExists(
         failedMessageDao.getConnectionSource(), AstarteGenericFailedMessage.class);
     mFailedMessageDao = failedMessageDao;
-    mFailedMessageQueue = new ArrayDeque<>(mFailedMessageDao.queryForAll());
+    mFailedMessageQueue =
+        new ArrayDeque<>(
+            mFailedMessageDao.query(
+                mFailedMessageDao.queryBuilder().orderBy("storageId", true).prepare()));
   }
 
   @Override
   public void insertVolatile(String topic, byte[] payload, int qos) {
     AstarteGenericFailedMessage m = new AstarteGenericFailedMessage(topic, payload, qos);
-    mFailedMessageQueue.push(m);
+    mFailedMessageQueue.add(m);
   }
 
   @Override
   public void insertVolatile(String topic, byte[] payload, int qos, int relativeExpiry) {
     AstarteGenericFailedMessage m =
         new AstarteGenericFailedMessage(topic, payload, qos, relativeExpiry);
-    mFailedMessageQueue.push(m);
+    mFailedMessageQueue.add(m);
   }
 
   @Override
   public void insertStored(String topic, byte[] payload, int qos) throws AstarteTransportException {
     AstarteGenericFailedMessage m = new AstarteGenericFailedMessage(topic, payload, qos);
     try {
-      storeAndPushMessage(m);
+      storeAndAddMessage(m);
     } catch (SQLException e) {
       throw new AstarteTransportException("Cannot store failed message", e);
     }
@@ -50,15 +53,15 @@ public class AstarteGenericFailedMessageStorage implements AstarteFailedMessageS
     AstarteGenericFailedMessage m =
         new AstarteGenericFailedMessage(topic, payload, qos, relativeExpiry);
     try {
-      storeAndPushMessage(m);
+      storeAndAddMessage(m);
     } catch (SQLException e) {
       throw new AstarteTransportException("Cannot store failed message", e);
     }
   }
 
-  private void storeAndPushMessage(AstarteGenericFailedMessage message) throws SQLException {
+  private void storeAndAddMessage(AstarteGenericFailedMessage message) throws SQLException {
     mFailedMessageDao.create(message);
-    mFailedMessageQueue.push(message);
+    mFailedMessageQueue.add(message);
   }
 
   @Override
