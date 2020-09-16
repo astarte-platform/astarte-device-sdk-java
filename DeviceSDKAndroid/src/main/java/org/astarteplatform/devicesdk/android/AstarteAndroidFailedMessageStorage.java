@@ -19,21 +19,21 @@ public class AstarteAndroidFailedMessageStorage implements AstarteFailedMessageS
   @Override
   public void insertVolatile(String topic, byte[] payload, int qos) {
     AstarteAndroidFailedMessage m = new AstarteAndroidFailedMessage(topic, payload, qos);
-    mFailedMessageQueue.push(m);
+    mFailedMessageQueue.add(m);
   }
 
   @Override
   public void insertVolatile(String topic, byte[] payload, int qos, int relativeExpiry) {
     AstarteAndroidFailedMessage m =
         new AstarteAndroidFailedMessage(topic, payload, qos, relativeExpiry);
-    mFailedMessageQueue.push(m);
+    mFailedMessageQueue.add(m);
   }
 
   @Override
   public void insertStored(String topic, byte[] payload, int qos) throws AstarteTransportException {
     AstarteAndroidFailedMessage m = new AstarteAndroidFailedMessage(topic, payload, qos);
     try {
-      storeAndPushMessage(m);
+      storeAndAddMessage(m);
     } catch (Exception e) {
       throw new AstarteTransportException("Cannot store failed message", e);
     }
@@ -45,16 +45,16 @@ public class AstarteAndroidFailedMessageStorage implements AstarteFailedMessageS
     AstarteAndroidFailedMessage m =
         new AstarteAndroidFailedMessage(topic, payload, qos, relativeExpiry);
     try {
-      storeAndPushMessage(m);
+      storeAndAddMessage(m);
     } catch (Exception e) {
       throw new AstarteTransportException("Cannot store failed message", e);
     }
   }
 
-  private void storeAndPushMessage(AstarteAndroidFailedMessage message) {
+  private void storeAndAddMessage(AstarteAndroidFailedMessage message) {
     long storageId = mFailedMessageDao.insert(message);
     message.setStorageId(storageId);
-    mFailedMessageQueue.push(message);
+    mFailedMessageQueue.add(message);
   }
 
   @Override
