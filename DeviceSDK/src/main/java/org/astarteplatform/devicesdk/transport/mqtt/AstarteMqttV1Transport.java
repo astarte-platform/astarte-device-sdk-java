@@ -30,6 +30,7 @@ import org.astarteplatform.devicesdk.protocol.AstarteDevicePropertyInterface;
 import org.astarteplatform.devicesdk.protocol.AstarteInterface;
 import org.astarteplatform.devicesdk.protocol.AstarteInterfaceDatastreamMapping;
 import org.astarteplatform.devicesdk.protocol.AstarteInterfaceMapping;
+import org.astarteplatform.devicesdk.protocol.AstarteInterfaceMappingNotFoundException;
 import org.astarteplatform.devicesdk.protocol.AstartePropertyEvent;
 import org.astarteplatform.devicesdk.protocol.AstartePropertyEventListener;
 import org.astarteplatform.devicesdk.protocol.AstarteProtocolType;
@@ -326,16 +327,16 @@ public class AstarteMqttV1Transport extends AstarteMqttTransport {
       AstarteInterface astarteInterface, String path, Object value, DateTime timestamp)
       throws AstarteTransportException {
     int qos = 2;
-    AstarteInterfaceDatastreamMapping mapping;
-    try {
-      // Find a matching mapping
-      mapping =
-          (AstarteInterfaceDatastreamMapping)
-              AstarteInterface.findMappingInInterface(astarteInterface, path);
-    } catch (Exception e) {
-      throw new AstarteTransportException("Mapping not found", e);
-    }
+    AstarteInterfaceDatastreamMapping mapping = null;
     if (astarteInterface instanceof AstarteDatastreamInterface) {
+      try {
+        // Find a matching mapping
+        mapping =
+            (AstarteInterfaceDatastreamMapping)
+                AstarteInterface.findMappingInInterface(astarteInterface, path);
+      } catch (AstarteInterfaceMappingNotFoundException e) {
+        throw new AstarteTransportException("Mapping not found", e);
+      }
       qos = qosFromReliability(mapping);
     }
 
@@ -345,7 +346,11 @@ public class AstarteMqttV1Transport extends AstarteMqttTransport {
     try {
       doSendMqttMessage(topic, payload, qos);
     } catch (MqttException e) {
-      handleFailedPublish(e, mapping, topic, payload, qos);
+      if (astarteInterface instanceof AstarteDatastreamInterface) {
+        handleDatastreamFailedPublish(e, mapping, topic, payload, qos);
+      } else {
+        handlePropertiesFailedPublish(e, topic, payload, qos);
+      }
     }
   }
 
@@ -373,11 +378,23 @@ public class AstarteMqttV1Transport extends AstarteMqttTransport {
     try {
       doSendMqttMessage(topic, payload, qos);
     } catch (MqttException e) {
-      handleFailedPublish(e, mapping, topic, payload, qos);
+      // Aggregate can only be Datastream
+      handleDatastreamFailedPublish(e, mapping, topic, payload, qos);
     }
   }
 
-  private void handleFailedPublish(
+  private void handlePropertiesFailedPublish(MqttException e, String topic, byte[] payload, int qos)
+      throws AstarteTransportException {
+    if (!isTemporaryException(e)) {
+      // Not a temporary exception, so it can't be solved by resending
+      throw new AstarteTransportException(e);
+    }
+
+    // Properties are always stored and never expire
+    m_failedMessageStorage.insertStored(topic, payload, qos);
+  }
+
+  private void handleDatastreamFailedPublish(
       MqttException e,
       AstarteInterfaceDatastreamMapping mapping,
       String topic,
