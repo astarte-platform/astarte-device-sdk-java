@@ -1,0 +1,13 @@
+plugins {
+	id 'application'
+}
+
+dependencies {
+	implementation project(':DeviceSDKGeneric')
+	implementation 'commons-cli:commons-cli:1.4'
+	implementation 'com.h2database:h2:1.4.200'
+}
+
+application {
+	mainClassName = 'org.astarteplatform.devicesdk.generic.examples.ExampleDevice'
+}
