@@ -67,7 +67,7 @@ dependencies {
 	androidTestImplementation 'androidx.test.espresso:espresso-core:3.2.0'
 
 	androidTestImplementation 'org.mongodb:bson:3.11.0'
-	androidTestImplementation 'com.squareup.okhttp3:okhttp:4.1.0'
+	androidTestImplementation 'com.squareup.okhttp3:okhttp:3.12.1'
 }
 
 task androidSourcesJar(type: Jar) {

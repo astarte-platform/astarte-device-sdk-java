@@ -173,7 +173,7 @@ public class AstartePairingHandler {
       throw new AstartePairingException("Could not build Pairing URL", e);
     }
 
-    RequestBody body = RequestBody.create(payload.toString(), JSON);
+    RequestBody body = RequestBody.create(JSON, payload.toString());
     Request request =
         new Request.Builder()
             .url(requestUrl)
