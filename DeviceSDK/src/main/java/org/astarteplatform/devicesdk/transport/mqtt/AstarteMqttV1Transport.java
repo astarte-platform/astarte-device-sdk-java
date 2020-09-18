@@ -19,6 +19,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.zip.InflaterInputStream;
+import org.astarteplatform.devicesdk.AstartePropertyStorageException;
 import org.astarteplatform.devicesdk.protocol.AstarteAggregateDatastreamEvent;
 import org.astarteplatform.devicesdk.protocol.AstarteAggregateDatastreamEventListener;
 import org.astarteplatform.devicesdk.protocol.AstarteAggregateDatastreamInterface;
@@ -82,7 +83,8 @@ public class AstarteMqttV1Transport extends AstarteMqttTransport {
         }
 
         @Override
-        public void messageArrived(String topic, MqttMessage message) {
+        public void messageArrived(String topic, MqttMessage message)
+            throws AstarteTransportException {
           System.out.println("Incoming message: " + new String(message.getPayload()));
           if (!topic.contains(m_baseTopic) || m_messageListener == null) {
             return;
@@ -288,8 +290,12 @@ public class AstarteMqttV1Transport extends AstarteMqttTransport {
 
     for (AstarteInterface astarteInterface : getDevice().getAllInterfaces()) {
       if (astarteInterface instanceof AstarteDevicePropertyInterface) {
-        Map<String, Object> storedPaths =
-            m_propertyStorage.getStoredValuesForInterface(astarteInterface);
+        Map<String, Object> storedPaths = null;
+        try {
+          storedPaths = m_propertyStorage.getStoredValuesForInterface(astarteInterface);
+        } catch (AstartePropertyStorageException e) {
+          throw new AstarteTransportException("Failed to resend properties", e);
+        }
         if (storedPaths == null) {
           continue;
         }
@@ -541,7 +547,7 @@ public class AstarteMqttV1Transport extends AstarteMqttTransport {
     }
   }
 
-  private void handlePurgeProperties(byte[] payload) {
+  private void handlePurgeProperties(byte[] payload) throws AstarteTransportException {
     // Remove first 4 bytes
     byte[] deflated = new byte[payload.length - 4];
     System.arraycopy(payload, 4, deflated, 0, payload.length - 4);
@@ -591,35 +597,34 @@ public class AstarteMqttV1Transport extends AstarteMqttTransport {
       }
 
       // Perform purge on the storage
-      m_propertyStorage.purgeProperties(availableProperties);
+      try {
+        m_propertyStorage.purgeProperties(availableProperties);
+      } catch (AstartePropertyStorageException e) {
+        throw new AstarteTransportException("Failed to purge properties", e);
+      }
     }
   }
 
   @Override
-  protected void onConnected(IMqttToken asyncActionToken) {
+  protected void onConnected(IMqttToken asyncActionToken) throws AstarteTransportException {
     // Called when connection has succeeded
     // Send introspection in case it's needed
     if (!asyncActionToken.getSessionPresent() || !m_introspectionSent) {
-      try {
-        // Set up subscriptions
-        setupSubscriptions();
-        // Prepare introspection and all
-        sendIntrospection();
-        sendEmptyCache();
-        m_introspectionSent = true;
-        // Send all properties
-        resendAllProperties();
-      } catch (AstarteTransportException e) {
-        e.printStackTrace();
-      }
+      // Set up subscriptions
+      setupSubscriptions();
+      // Prepare introspection and all
+      sendIntrospection();
+      sendEmptyCache();
+      m_introspectionSent = true;
+      // Send all properties
+      resendAllProperties();
     }
 
     // Try to resend previously failed messages
     try {
       retryFailedMessages();
     } catch (AstarteTransportException e) {
-      // TODO: what should we do here?
-      e.printStackTrace();
+      throw new AstarteTransportException("Message redelivery failed", e);
     }
 
     if (m_astarteTransportEventListener != null) {

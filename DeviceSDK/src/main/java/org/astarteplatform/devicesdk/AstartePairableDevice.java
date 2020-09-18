@@ -175,6 +175,38 @@ public abstract class AstartePairableDevice extends AstarteDevice
   }
 
   @Override
+  public void onTransportConnectionInitializationError(Throwable cause) {
+    synchronized (this) {
+      if (mAstarteMessageListener != null) {
+        mAstarteMessageListener.onFailure(cause);
+      } else {
+        cause.printStackTrace();
+      }
+
+      // Disconnect and reconnect in a separate thread since we can't call
+      // disconnect() in a callback.
+      new Thread(
+              new Runnable() {
+                public void run() {
+                  try {
+                    disconnect();
+                    // Manually call this since we explicitly disconnect, in case the user
+                    // is handling reconnection manually
+                    if (mAstarteMessageListener != null) {
+                      mAstarteMessageListener.onDisconnected(cause);
+                    }
+                  } catch (AstarteTransportException e) {
+                    // Not much that we can do here, we are reconnecting below
+                    e.printStackTrace();
+                  }
+                  eventuallyReconnect();
+                }
+              })
+          .start();
+    }
+  }
+
+  @Override
   public void onTransportConnectionError(Throwable cause) {
     synchronized (this) {
       if (cause instanceof AstarteCryptoException) {

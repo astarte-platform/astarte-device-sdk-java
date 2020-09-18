@@ -75,20 +75,19 @@ public class AstarteGenericFailedMessageStorage implements AstarteFailedMessageS
   }
 
   @Override
-  public void ackFirst() {
+  public void ackFirst() throws AstarteTransportException {
     AstarteGenericFailedMessage m = mFailedMessageQueue.pop();
     if (m.getStorageId() > 0) {
       try {
         mFailedMessageDao.delete(m);
       } catch (SQLException e) {
-        // TODO: handle failed deletion
-        e.printStackTrace();
+        throw new AstarteTransportException("Cannot remove acked message from storage", e);
       }
     }
   }
 
   @Override
-  public void rejectFirst() {
+  public void rejectFirst() throws AstarteTransportException {
     // This is the same as ackFirst in this implementation, but the two are separate to allow
     // additional actions when a message is removed without it being successfully delivered
     AstarteGenericFailedMessage m = mFailedMessageQueue.pop();
@@ -96,8 +95,7 @@ public class AstarteGenericFailedMessageStorage implements AstarteFailedMessageS
       try {
         mFailedMessageDao.delete(m);
       } catch (SQLException e) {
-        // TODO: handle failed deletion
-        e.printStackTrace();
+        throw new AstarteTransportException("Cannot remove rejected message from storage", e);
       }
     }
   }

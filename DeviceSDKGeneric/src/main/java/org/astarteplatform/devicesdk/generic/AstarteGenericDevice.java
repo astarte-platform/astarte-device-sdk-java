@@ -7,6 +7,7 @@ import org.astarteplatform.devicesdk.AstarteInterfaceProvider;
 import org.astarteplatform.devicesdk.AstartePairableDevice;
 import org.astarteplatform.devicesdk.AstartePairingHandler;
 import org.astarteplatform.devicesdk.AstartePropertyStorage;
+import org.astarteplatform.devicesdk.AstartePropertyStorageException;
 import org.astarteplatform.devicesdk.protocol.AstarteInvalidInterfaceException;
 import org.astarteplatform.devicesdk.transport.AstarteFailedMessageStorage;
 import org.json.JSONException;
@@ -19,7 +20,8 @@ public class AstarteGenericDevice extends AstartePairableDevice {
       AstarteInterfaceProvider interfaceProvider,
       String pairingBaseUrl,
       ConnectionSource connectionSource)
-      throws JSONException, AstarteInvalidInterfaceException, SQLException {
+      throws JSONException, AstarteInvalidInterfaceException, AstartePropertyStorageException,
+          SQLException {
     this(
         deviceId,
         astarteRealm,
