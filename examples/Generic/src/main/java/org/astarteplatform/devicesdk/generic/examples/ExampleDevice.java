@@ -7,6 +7,7 @@ import org.astarteplatform.devicesdk.AstarteDevice;
 import org.astarteplatform.devicesdk.generic.AstarteGenericDevice;
 import org.astarteplatform.devicesdk.protocol.AstarteDeviceDatastreamInterface;
 import org.astarteplatform.devicesdk.protocol.AstarteDevicePropertyInterface;
+import org.astarteplatform.devicesdk.transport.AstarteTransportException;
 import org.joda.time.DateTime;
 
 public class ExampleDevice {
@@ -90,6 +91,13 @@ public class ExampleDevice {
     device.addGlobalEventListener(new ExampleGlobalEventListener());
 
     /*
+     * Set this if you want to let AstarteDevice take care of the reconnection. The default
+     * is false, which means that the application is responsible of reconnecting in case of
+     * failures
+     */
+    device.setAlwaysReconnect(true);
+
+    /*
      * Start the connection
      */
     device.connect();
@@ -129,7 +137,11 @@ public class ExampleDevice {
     while (true) {
       double value = 20 + 10 * r.nextDouble();
       System.out.println("Streaming value: " + value);
-      valuesInterface.streamData(path, value, DateTime.now());
+      try {
+        valuesInterface.streamData(path, value, DateTime.now());
+      } catch (AstarteTransportException e) {
+        e.printStackTrace();
+      }
       Thread.sleep(500);
     }
   }
