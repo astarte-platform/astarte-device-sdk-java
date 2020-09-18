@@ -1,4 +1,4 @@
 include ':DeviceSDK'
 include ':DeviceSDKAndroid'
 include ':DeviceSDKGeneric'
-include ':examples'
+include ':examples:Generic'
