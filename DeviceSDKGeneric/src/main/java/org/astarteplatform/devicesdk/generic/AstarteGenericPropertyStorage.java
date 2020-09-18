@@ -9,6 +9,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import org.astarteplatform.devicesdk.AstartePropertyStorage;
+import org.astarteplatform.devicesdk.AstartePropertyStorageException;
 import org.astarteplatform.devicesdk.protocol.AstarteInterface;
 import org.bson.BSONCallback;
 import org.bson.BSONDecoder;
@@ -29,14 +30,19 @@ class AstarteGenericPropertyStorage implements AstartePropertyStorage {
   private Dao<AstarteGenericPropertyEntry, String> mPropertyEntryDao;
 
   AstarteGenericPropertyStorage(Dao<AstarteGenericPropertyEntry, String> propertyEntryDao)
-      throws SQLException {
-    TableUtils.createTableIfNotExists(
-        propertyEntryDao.getConnectionSource(), AstarteGenericPropertyEntry.class);
+      throws AstartePropertyStorageException {
+    try {
+      TableUtils.createTableIfNotExists(
+          propertyEntryDao.getConnectionSource(), AstarteGenericPropertyEntry.class);
+    } catch (SQLException e) {
+      throw new AstartePropertyStorageException("Cannot create property storage table", e);
+    }
     mPropertyEntryDao = propertyEntryDao;
   }
 
   @Override
-  public List<String> getStoredPathsForInterface(String astarteInterfaceName) {
+  public List<String> getStoredPathsForInterface(String astarteInterfaceName)
+      throws AstartePropertyStorageException {
     List<String> returnedPaths = new ArrayList<>();
     QueryBuilder<AstarteGenericPropertyEntry, String> statementBuilder =
         mPropertyEntryDao.queryBuilder();
@@ -51,8 +57,7 @@ class AstarteGenericPropertyStorage implements AstartePropertyStorage {
           returnedPaths.add(entry.getPath());
         }
       } catch (SQLException e) {
-        // TODO: make exception surface to the SDK
-        e.printStackTrace();
+        throw new AstartePropertyStorageException("Failed to retrieve stored paths", e);
       }
     }
 
@@ -60,7 +65,8 @@ class AstarteGenericPropertyStorage implements AstartePropertyStorage {
   }
 
   @Override
-  public Map<String, Object> getStoredValuesForInterface(AstarteInterface astarteInterface) {
+  public Map<String, Object> getStoredValuesForInterface(AstarteInterface astarteInterface)
+      throws AstartePropertyStorageException {
     Map<String, Object> returnedValues = new HashMap<>();
     QueryBuilder<AstarteGenericPropertyEntry, String> statementBuilder =
         mPropertyEntryDao.queryBuilder();
@@ -78,8 +84,7 @@ class AstarteGenericPropertyStorage implements AstartePropertyStorage {
           returnedValues.put(entry.getPath(), value);
         }
       } catch (SQLException e) {
-        // TODO: make exception surface to the SDK
-        e.printStackTrace();
+        throw new AstartePropertyStorageException("Failed to retrieve stored values", e);
       }
     }
 
@@ -127,7 +132,8 @@ class AstarteGenericPropertyStorage implements AstartePropertyStorage {
   }
 
   @Override
-  public void setStoredValue(String interfaceName, String path, Object value) {
+  public void setStoredValue(String interfaceName, String path, Object value)
+      throws AstartePropertyStorageException {
     byte[] bsonValue = serialize(value);
     AstarteGenericPropertyEntry entry =
         new AstarteGenericPropertyEntry(interfaceName, path, bsonValue);
@@ -135,8 +141,7 @@ class AstarteGenericPropertyStorage implements AstartePropertyStorage {
       try {
         mPropertyEntryDao.createOrUpdate(entry);
       } catch (SQLException e) {
-        // TODO: make exception surface to the SDK
-        e.printStackTrace();
+        throw new AstartePropertyStorageException("Failed to save stored value", e);
       }
     }
   }
@@ -164,19 +169,20 @@ class AstarteGenericPropertyStorage implements AstartePropertyStorage {
   }
 
   @Override
-  public void removeStoredPath(String interfaceName, String path) {
+  public void removeStoredPath(String interfaceName, String path)
+      throws AstartePropertyStorageException {
     synchronized (this) {
       try {
         mPropertyEntryDao.deleteById(interfaceName + "/" + path);
       } catch (SQLException e) {
-        // TODO: make exception surface to the SDK
-        e.printStackTrace();
+        throw new AstartePropertyStorageException("Failed to delete stored value", e);
       }
     }
   }
 
   @Override
-  public void purgeProperties(Map<String, List<String>> availableProperties) {
+  public void purgeProperties(Map<String, List<String>> availableProperties)
+      throws AstartePropertyStorageException {
     synchronized (this) {
       // When we get this, we want to clear all keys which aren't part of the received list.
       for (Map.Entry<String, List<String>> entry : availableProperties.entrySet()) {

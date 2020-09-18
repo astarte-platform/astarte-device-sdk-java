@@ -2,6 +2,7 @@ package org.astarteplatform.devicesdk.protocol;
 
 import java.util.Map;
 import org.astarteplatform.devicesdk.AstartePropertyStorage;
+import org.astarteplatform.devicesdk.AstartePropertyStorageException;
 import org.joda.time.DateTime;
 
 public abstract class AstartePropertyInterface extends AstarteInterface {
@@ -16,7 +17,11 @@ public abstract class AstartePropertyInterface extends AstarteInterface {
       return null;
     }
 
-    return mPropertyStorage.getStoredValuesForInterface(this);
+    try {
+      return mPropertyStorage.getStoredValuesForInterface(this);
+    } catch (AstartePropertyStorageException e) {
+      return null;
+    }
   }
 
   Object getPropertyValue(String path) {
@@ -24,7 +29,12 @@ public abstract class AstartePropertyInterface extends AstarteInterface {
       return null;
     }
 
-    Map<String, Object> storedPaths = mPropertyStorage.getStoredValuesForInterface(this);
+    Map<String, Object> storedPaths = null;
+    try {
+      storedPaths = mPropertyStorage.getStoredValuesForInterface(this);
+    } catch (AstartePropertyStorageException e) {
+      return null;
+    }
     if (!storedPaths.containsKey(path)) {
       return null;
     }

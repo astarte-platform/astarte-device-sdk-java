@@ -19,7 +19,13 @@ public abstract class AstarteMqttTransport extends AstarteTransport implements I
   private final IMqttActionListener mMqttActionListener =
       new IMqttActionListener() {
         public void onSuccess(IMqttToken asyncActionToken) {
-          onConnected(asyncActionToken);
+          try {
+            onConnected(asyncActionToken);
+          } catch (AstarteTransportException e) {
+            if (m_astarteTransportEventListener != null) {
+              m_astarteTransportEventListener.onTransportConnectionInitializationError(e);
+            }
+          }
         }
 
         public void onFailure(IMqttToken asyncActionToken, Throwable exception) {
@@ -150,5 +156,5 @@ public abstract class AstarteMqttTransport extends AstarteTransport implements I
     m_astarteTransportEventListener.onTransportConnectionError(failureCause);
   }
 
-  protected abstract void onConnected(IMqttToken asyncActionToken);
+  protected abstract void onConnected(IMqttToken asyncActionToken) throws AstarteTransportException;
 }

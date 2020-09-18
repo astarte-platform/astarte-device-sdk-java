@@ -14,7 +14,7 @@ public interface AstarteFailedMessageStorage {
 
   AstarteFailedMessage peekFirst();
 
-  void ackFirst();
+  void ackFirst() throws AstarteTransportException;
 
-  void rejectFirst();
+  void rejectFirst() throws AstarteTransportException;
 }
