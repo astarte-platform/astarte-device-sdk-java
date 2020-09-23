@@ -162,23 +162,20 @@ public abstract class AstarteInterface {
   }
 
   public static void validateAggregate(
-      AstarteInterface astarteInterface, Map<String, Object> payload, DateTime timestamp)
+      AstarteInterface astarteInterface,
+      String pathPrefix,
+      Map<String, Object> payload,
+      DateTime timestamp)
       throws AstarteInvalidValueException, AstarteInterfaceMappingNotFoundException {
     // We need to ensure the path list matches
-    // TODO: Aggregate validation in Astarte is still WIP. Get back to this when it's final.
     if (astarteInterface.getMappings().size() != payload.size()) {
       throw new AstarteInterfaceMappingNotFoundException(
           "The interface mapping and the payload don't match.");
     }
     for (Map.Entry<String, Object> payloadEntry : payload.entrySet()) {
+      String path = pathPrefix + "/" + payloadEntry.getKey();
       validatePayload(
-          findMappingInInterface(astarteInterface, payloadEntry.getKey()),
-          payloadEntry.getValue(),
-          timestamp);
-    }
-    if (!astarteInterface.getMappings().keySet().equals(payload.keySet())) {
-      throw new AstarteInterfaceMappingNotFoundException(
-          "The interface mapping and the payload don't match.");
+          findMappingInInterface(astarteInterface, path), payloadEntry.getValue(), timestamp);
     }
   }
 

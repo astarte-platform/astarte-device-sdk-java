@@ -19,7 +19,7 @@ public class AstarteDeviceAggregateDatastreamInterface extends AstarteAggregateD
   public void streamData(String path, Map<String, Object> payload, DateTime timestamp)
       throws AstarteTransportException, AstarteInvalidValueException,
           AstarteInterfaceMappingNotFoundException {
-    validateAggregate(this, payload, timestamp);
+    validateAggregate(this, path, payload, timestamp);
 
     AstarteTransport transport = getAstarteTransport();
     if (transport == null) {
