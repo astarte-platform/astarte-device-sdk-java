@@ -12,7 +12,7 @@
             "type": "string",
             "explicit_timestamp": true,
             "database_retention_policy": "use_ttl",
-            "database_retention_ttl": 1440,
+            "database_retention_ttl": 86400,
             "doc": "A string representing a command. The command is deleted from Astarte after 24 hours."
         }
     ]
