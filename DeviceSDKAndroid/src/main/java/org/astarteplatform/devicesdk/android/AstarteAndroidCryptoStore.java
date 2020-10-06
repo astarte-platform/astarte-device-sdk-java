@@ -107,14 +107,11 @@ class AstarteAndroidCryptoStore implements AstarteCryptoStore {
         KeyPairGenerator.getInstance(KeyProperties.KEY_ALGORITHM_RSA, "AndroidKeyStore");
     keyGen.initialize(
         new KeyGenParameterSpec.Builder(
-                "AstarteCertificate",
-                KeyProperties.PURPOSE_ENCRYPT
-                    | KeyProperties.PURPOSE_DECRYPT
-                    | KeyProperties.PURPOSE_SIGN)
+                "AstarteCertificate", KeyProperties.PURPOSE_VERIFY | KeyProperties.PURPOSE_SIGN)
             .setDigests(
-                KeyProperties.DIGEST_NONE, KeyProperties.DIGEST_SHA256, KeyProperties.DIGEST_SHA1)
+                KeyProperties.DIGEST_NONE, KeyProperties.DIGEST_SHA256, KeyProperties.DIGEST_SHA512)
             .setSignaturePaddings(KeyProperties.SIGNATURE_PADDING_RSA_PKCS1)
-            .setEncryptionPaddings(KeyProperties.ENCRYPTION_PADDING_RSA_PKCS1)
+            .setEncryptionPaddings(KeyProperties.ENCRYPTION_PADDING_NONE)
             .build());
 
     m_keyPair = keyGen.generateKeyPair();
