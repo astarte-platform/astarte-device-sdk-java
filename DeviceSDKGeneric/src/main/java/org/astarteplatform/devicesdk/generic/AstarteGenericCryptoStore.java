@@ -9,8 +9,10 @@ import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
 import java.security.PrivateKey;
 import java.security.PublicKey;
+import java.security.SecureRandom;
 import java.security.cert.Certificate;
 import java.security.cert.CertificateException;
+import java.security.spec.ECGenParameterSpec;
 import javax.net.ssl.SSLSocketFactory;
 import org.astarteplatform.devicesdk.crypto.AstarteCryptoStore;
 import org.bouncycastle.asn1.x500.X500Name;
@@ -68,8 +70,8 @@ class AstarteGenericCryptoStore implements AstarteCryptoStore {
     // Clear the KeyStore first.
     clearKeyStore();
 
-    KeyPairGenerator keyGen = KeyPairGenerator.getInstance("RSA");
-    keyGen.initialize(4096);
+    KeyPairGenerator keyGen = KeyPairGenerator.getInstance("EC");
+    keyGen.initialize(new ECGenParameterSpec("secp256r1"), new SecureRandom());
 
     m_keyPair = keyGen.generateKeyPair();
   }
@@ -88,7 +90,7 @@ class AstarteGenericCryptoStore implements AstarteCryptoStore {
     X500Name subjectName = new X500Name(directoryString);
     JcaPKCS10CertificationRequestBuilder kpGen =
         new JcaPKCS10CertificationRequestBuilder(subjectName, m_keyPair.getPublic());
-    JcaContentSignerBuilder csBuilder = new JcaContentSignerBuilder("SHA256withRSA");
+    JcaContentSignerBuilder csBuilder = new JcaContentSignerBuilder("SHA256withECDSA");
     ContentSigner signer = csBuilder.build(m_keyPair.getPrivate());
     PKCS10CertificationRequest request = kpGen.build(signer);
 
