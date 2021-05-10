@@ -42,3 +42,11 @@ test {
 
 	maxHeapSize = '1G'
 }
+
+ext {
+	PUBLISH_GROUP_ID = project.group
+	PUBLISH_VERSION = project.version
+	PUBLISH_ARTIFACT_ID = 'devicesdk-generic'
+}
+
+apply from: "${rootProject.projectDir}/scripts/publish-module.gradle"
