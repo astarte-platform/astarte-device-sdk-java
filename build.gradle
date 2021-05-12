@@ -14,6 +14,7 @@ buildscript {
 
 plugins {
 	id 'com.diffplug.spotless' version '5.5.1'
+	id("io.github.gradle-nexus.publish-plugin") version "1.1.0"
 }
 
 allprojects {
@@ -30,3 +31,5 @@ spotless {
 		target '*.gradle', 'gradle/*.gradle'
 	}
 }
+
+apply from: "${rootDir}/scripts/publish-root.gradle"

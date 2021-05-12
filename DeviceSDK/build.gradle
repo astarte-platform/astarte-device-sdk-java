@@ -27,3 +27,11 @@ dependencies {
 
 	api 'joda-time:joda-time:2.9.7'
 }
+
+ext {
+	PUBLISH_GROUP_ID = project.group
+	PUBLISH_VERSION = project.version
+	PUBLISH_ARTIFACT_ID = 'devicesdk'
+}
+
+apply from: "${rootProject.projectDir}/scripts/publish-module.gradle"
