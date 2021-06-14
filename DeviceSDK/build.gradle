@@ -26,6 +26,8 @@ dependencies {
 	implementation 'com.squareup.okhttp3:okhttp:3.12.1'
 
 	api 'joda-time:joda-time:2.9.7'
+
+	testImplementation 'junit:junit:4.13'
 }
 
 ext {
