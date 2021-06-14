@@ -10,14 +10,7 @@ import java.util.List;
 import java.util.Map;
 import org.astarteplatform.devicesdk.AstartePropertyStorage;
 import org.astarteplatform.devicesdk.protocol.AstarteInterface;
-import org.bson.BSONCallback;
-import org.bson.BSONDecoder;
-import org.bson.BSONObject;
-import org.bson.BasicBSONCallback;
-import org.bson.BasicBSONDecoder;
-import org.bson.BsonBinaryWriter;
-import org.bson.BsonValue;
-import org.bson.Document;
+import org.bson.*;
 import org.bson.codecs.DocumentCodec;
 import org.bson.codecs.EncoderContext;
 import org.bson.io.BasicOutputBuffer;
@@ -74,7 +67,7 @@ class AstarteGenericPropertyStorage implements AstartePropertyStorage {
         List<AstarteGenericPropertyEntry> result =
             mPropertyEntryDao.query(statementBuilder.prepare());
         for (AstarteGenericPropertyEntry entry : result) {
-          Object value = deserialize(entry.getBSONValue());
+          Object value = deserialize(entry.getBSONValue(), mBSONCallback, mBSONDecoder);
           returnedValues.put(entry.getPath(), value);
         }
       } catch (SQLException e) {
@@ -86,44 +79,14 @@ class AstarteGenericPropertyStorage implements AstartePropertyStorage {
     return returnedValues;
   }
 
-  private Object deserialize(byte[] bsonValue) {
+  protected static Object deserialize(
+      byte[] bsonValue, BSONCallback bsonCallback, BSONDecoder decoder) {
     // Parse the BSON payload
-    mBSONCallback.reset();
-    mBSONDecoder.decode(bsonValue, mBSONCallback);
-    BSONObject decodedPayload = (BSONObject) mBSONCallback.get();
-    // Parse the BSON value
-    return toJavaType((BsonValue) decodedPayload.get("v"));
-  }
+    bsonCallback.reset();
+    decoder.decode(bsonValue, bsonCallback);
+    BSONObject decodedPayload = (BSONObject) bsonCallback.get();
 
-  private Object toJavaType(BsonValue value) {
-    switch (value.getBsonType()) {
-      case INT32:
-        return value.asInt32().getValue();
-      case INT64:
-        return value.asInt64().getValue();
-      case STRING:
-        return value.asString().getValue();
-      case DECIMAL128:
-        return value.asDecimal128().doubleValue();
-      case DOUBLE:
-        return value.asDouble().getValue();
-      case BOOLEAN:
-        return value.asBoolean().getValue();
-      case OBJECT_ID:
-        return value.asObjectId().getValue();
-      case BINARY:
-        return value.asBinary().getData();
-      case DATE_TIME:
-        return new DateTime(value.asDateTime().getValue());
-      case SYMBOL:
-        return value.asSymbol().getSymbol();
-      case ARRAY:
-        return value.asArray().toArray();
-      case DOCUMENT:
-        return Document.parse(value.asDocument().toJson());
-      default:
-        return value;
-    }
+    return decodedPayload.get("v");
   }
 
   @Override
@@ -141,7 +104,7 @@ class AstarteGenericPropertyStorage implements AstartePropertyStorage {
     }
   }
 
-  private byte[] serialize(Object value) {
+  protected static byte[] serialize(Object value) {
     HashMap<String, Object> bsonJavaObject = new HashMap<>();
 
     if (value instanceof DateTime) {
