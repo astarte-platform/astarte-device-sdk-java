@@ -202,6 +202,17 @@ public class AstarteMqttV1Transport extends AstarteMqttTransport {
                 AstarteServerPropertyInterface realInterface =
                     (AstarteServerPropertyInterface) targetInterface;
 
+                // Save to our property storage
+                if (m_propertyStorage != null) {
+                  if (astarteValue != null) {
+                    m_propertyStorage.setStoredValue(astarteInterface, interfacePath, astarteValue);
+                  } else {
+                    m_propertyStorage.removeStoredPath(astarteInterface, interfacePath);
+                  }
+                } else {
+                  System.err.println("Property storage invalid! Caching won't work");
+                }
+
                 AstartePropertyEvent e =
                     new AstartePropertyEvent(astarteInterface, interfacePath, astarteValue);
 
