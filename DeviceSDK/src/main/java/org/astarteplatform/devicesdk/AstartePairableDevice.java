@@ -249,7 +249,7 @@ public abstract class AstartePairableDevice extends AstarteDevice
   public void onTransportDisconnected() {
     synchronized (this) {
       if (mAstarteMessageListener != null) {
-        mAstarteMessageListener.onDisconnected(null);
+        mAstarteMessageListener.onDisconnected(new AstarteTransportException("Connection lost"));
       }
 
       if (alwaysReconnects() && !mExplicitDisconnectionRequest) {
