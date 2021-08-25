@@ -204,10 +204,16 @@ public class AstarteMqttV1Transport extends AstarteMqttTransport {
 
                 // Save to our property storage
                 if (m_propertyStorage != null) {
-                  if (astarteValue != null) {
-                    m_propertyStorage.setStoredValue(astarteInterface, interfacePath, astarteValue);
-                  } else {
-                    m_propertyStorage.removeStoredPath(astarteInterface, interfacePath);
+                  try {
+                    if (astarteValue != null) {
+                      m_propertyStorage.setStoredValue(
+                          astarteInterface, interfacePath, astarteValue);
+                    } else {
+                      m_propertyStorage.removeStoredPath(astarteInterface, interfacePath);
+                    }
+                  } catch (AstartePropertyStorageException e) {
+                    System.err.println(
+                        "AstartePropertyStorageException: Caching won't work " + e.getMessage());
                   }
                 } else {
                   System.err.println("Property storage invalid! Caching won't work");
