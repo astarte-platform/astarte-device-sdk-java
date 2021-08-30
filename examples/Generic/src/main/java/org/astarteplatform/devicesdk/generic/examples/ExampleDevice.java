@@ -2,8 +2,11 @@ package org.astarteplatform.devicesdk.generic.examples;
 
 import com.j256.ormlite.jdbc.JdbcConnectionSource;
 import java.util.Random;
+import java.util.UUID;
 import org.apache.commons.cli.*;
 import org.astarteplatform.devicesdk.AstarteDevice;
+import org.astarteplatform.devicesdk.AstarteDeviceIdUtils;
+import org.astarteplatform.devicesdk.AstartePairingService;
 import org.astarteplatform.devicesdk.generic.AstarteGenericDevice;
 import org.astarteplatform.devicesdk.protocol.AstarteDeviceDatastreamInterface;
 import org.astarteplatform.devicesdk.protocol.AstarteDevicePropertyInterface;
@@ -26,16 +29,6 @@ public class ExampleDevice {
     realmOpt.setRequired(true);
     options.addOption(realmOpt);
 
-    Option deviceIdOpt = new Option("d", "device-id", true, "The device id for the Astarte Device");
-    deviceIdOpt.setRequired(true);
-    options.addOption(deviceIdOpt);
-
-    Option credentialsSecretOpt =
-        new Option(
-            "c", "credentials-secret", true, "The credentials secret for the Astarte Device");
-    credentialsSecretOpt.setRequired(true);
-    options.addOption(credentialsSecretOpt);
-
     Option pairingUrlOpt =
         new Option(
             "p",
@@ -44,6 +37,17 @@ public class ExampleDevice {
             "The URL to reach Pairing API in the target Astarte instance");
     pairingUrlOpt.setRequired(true);
     options.addOption(pairingUrlOpt);
+
+    Option jwtOpt = new Option("t", "jwt", true, "The jwt for the Astarte Register Device");
+    options.addOption(jwtOpt);
+
+    Option deviceIdOpt = new Option("d", "device-id", true, "The device id for the Astarte Device");
+    options.addOption(deviceIdOpt);
+
+    Option credentialsSecretOpt =
+        new Option(
+            "c", "credentials-secret", true, "The credentials secret for the Astarte Device");
+    options.addOption(credentialsSecretOpt);
 
     CommandLineParser parser = new DefaultParser();
     HelpFormatter formatter = new HelpFormatter();
@@ -59,9 +63,24 @@ public class ExampleDevice {
     }
 
     String realm = cmd.getOptionValue("realm");
+    String pairingUrl = cmd.getOptionValue("pairing-url");
     String deviceId = cmd.getOptionValue("device-id");
     String credentialsSecret = cmd.getOptionValue("credentials-secret");
-    String pairingUrl = cmd.getOptionValue("pairing-url");
+    String jwt = cmd.getOptionValue("jwt");
+
+    if (deviceId == null || deviceId.isEmpty()) {
+      /*
+       * Astarte device id creation
+       */
+
+      UUID uuidNamespace = UUID.fromString("f79ad91f-c638-4889-ae74-9d001a3b4cf8");
+      String macAddress = "98:75:a8:0d:96:db";
+      deviceId = AstarteDeviceIdUtils.generateId(uuidNamespace, macAddress);
+      System.out.println("deviceId: " + deviceId);
+
+      credentialsSecret =
+          new AstartePairingService(pairingUrl, realm).registerDevice(jwt, deviceId);
+    }
 
     /*
      * Astarte device creation

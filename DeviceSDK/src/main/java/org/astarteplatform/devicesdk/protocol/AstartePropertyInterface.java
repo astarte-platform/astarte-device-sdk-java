@@ -24,7 +24,7 @@ public abstract class AstartePropertyInterface extends AstarteInterface {
     }
   }
 
-  Object getPropertyValue(String path) {
+  private <T> T getPropertyValue(String path, Class<T> clazz) {
     if (mPropertyStorage == null) {
       return null;
     }
@@ -38,34 +38,47 @@ public abstract class AstartePropertyInterface extends AstarteInterface {
     if (!storedPaths.containsKey(path)) {
       return null;
     }
-    return storedPaths.get(path);
+
+    Object value = storedPaths.get(path);
+    if (value == null) {
+      return null;
+    }
+
+    return clazz.cast(value);
   }
 
+  /** Returns the value mapped by {@code path} if it exists or null if no such mapping exists. */
   public String getPropertyValueString(String path) {
-    return (String) getPropertyValue(path);
+    return getPropertyValue(path, String.class);
   }
 
-  public boolean getPropertyValueBoolean(String path) {
-    return (boolean) getPropertyValue(path);
+  /** Returns the value mapped by {@code path} if it exists or null if no such mapping exists. */
+  public Boolean getPropertyValueBoolean(String path) {
+    return getPropertyValue(path, Boolean.class);
   }
 
-  public int getPropertyValueInt(String path) {
-    return (int) getPropertyValue(path);
+  /** Returns the value mapped by {@code path} if it exists or null if no such mapping exists. */
+  public Integer getPropertyValueInt(String path) {
+    return getPropertyValue(path, Integer.class);
   }
 
-  public long getPropertyValueLong(String path) {
-    return (long) getPropertyValue(path);
+  /** Returns the value mapped by {@code path} if it exists or null if no such mapping exists. */
+  public Long getPropertyValueLong(String path) {
+    return getPropertyValue(path, Long.class);
   }
 
-  public double getPropertyValueDouble(String path) {
-    return (double) getPropertyValue(path);
+  /** Returns the value mapped by {@code path} if it exists or null if no such mapping exists. */
+  public Double getPropertyValueDouble(String path) {
+    return getPropertyValue(path, Double.class);
   }
 
+  /** Returns the value mapped by {@code path} if it exists or null if no such mapping exists. */
   public byte[] getPropertyValueByteArray(String path) {
-    return (byte[]) getPropertyValue(path);
+    return getPropertyValue(path, byte[].class);
   }
 
+  /** Returns the value mapped by {@code path} if it exists or null if no such mapping exists. */
   public DateTime getPropertyValueDateTime(String path) {
-    return (DateTime) getPropertyValue(path);
+    return getPropertyValue(path, DateTime.class);
   }
 }
