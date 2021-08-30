@@ -4,6 +4,11 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
+## [1.1.0-dev] - Unreleased
+### Changed
+- Update Gradle to latest stable 7.2
+- [android] Update Android Gradle plugin and Android target version
+
 ## [1.0.0] - 2021-07-02
 ### Added
 - Add methods that generate an Astarte Device ID using either a random UUIDv4 or by deriving an UUIDv5 using unique data.
