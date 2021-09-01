@@ -13,196 +13,120 @@ import org.astarteplatform.devicesdk.transport.AstarteFailedMessageStorage;
 import org.astarteplatform.devicesdk.transport.AstarteTransportException;
 import org.astarteplatform.devicesdk.util.AstartePayload;
 import org.astarteplatform.devicesdk.util.DecodedMessage;
-import org.bson.*;
+import org.bson.BSONCallback;
+import org.bson.BSONDecoder;
+import org.bson.BasicBSONCallback;
+import org.bson.BasicBSONDecoder;
 import org.eclipse.paho.client.mqttv3.*;
 import org.joda.time.DateTime;
 
-public class AstarteMqttV1Transport extends AstarteMqttTransport {
+public class AstarteMqttV1Transport extends AstarteMqttTransport implements MqttCallbackExtended {
   private final String m_baseTopic;
   private final BSONDecoder mBSONDecoder = new BasicBSONDecoder();
   private final BSONCallback mBSONCallback = new BasicBSONCallback();
-  private final MqttCallback mMqttCallback =
-      new MqttCallbackExtended() {
-        @Override
-        public void connectComplete(boolean reconnect, String serverURI) {
-          if (reconnect) {
-            System.out.println("Reconnected to : " + serverURI);
-          } else {
-            System.out.println("Connected to: " + serverURI);
-          }
+
+  @Override
+  public void connectComplete(boolean reconnect, String serverURI) {
+    if (reconnect) {
+      System.out.println("Reconnected to : " + serverURI);
+    } else {
+      System.out.println("Connected to: " + serverURI);
+    }
+  }
+
+  @Override
+  public void connectionLost(Throwable cause) {
+    if (m_astarteTransportEventListener != null) {
+      m_astarteTransportEventListener.onTransportDisconnected();
+    } else {
+      System.out.println("The Connection was lost.");
+    }
+  }
+
+  @Override
+  public void messageArrived(String topic, MqttMessage message) throws AstarteTransportException {
+    System.out.println("Incoming message: " + new String(message.getPayload()));
+    if (!topic.contains(m_baseTopic) || m_messageListener == null) {
+      return;
+    }
+
+    String path = topic.replace(m_baseTopic + "/", "");
+
+    // Is it a control message?
+    if (path.startsWith("control")) {
+      if (Objects.equals(path, "control/consumer/properties")) {
+        handlePurgeProperties(message.getPayload());
+      } else {
+        System.err.println("Unhandled control message!" + path);
+      }
+      return;
+    }
+
+    String astarteInterface = path.split("/")[0];
+    String interfacePath = path.replace(astarteInterface, "");
+
+    // Identify in our introspection whether the interface exists
+    if (!getDevice().hasInterface(astarteInterface)) {
+      System.err.println("Got an unexpected interface! " + astarteInterface);
+      return;
+    }
+
+    Object payload;
+    DateTime timestamp = null;
+    if (message.getPayload().length == 0) {
+      // This is a property unset
+      payload = null;
+    } else {
+      final DecodedMessage decodedMessage =
+          AstartePayload.deserialize(message.getPayload(), mBSONDecoder, mBSONCallback);
+      payload = decodedMessage.getPayload();
+      timestamp = decodedMessage.getTimestamp();
+    }
+
+    AstarteInterface targetInterface = getDevice().getInterface(astarteInterface);
+    if (!(targetInterface instanceof AstarteServerValueBuilder)) {
+      return;
+    }
+
+    AstarteServerValueBuilder astarteServerValueBuilder =
+        (AstarteServerValueBuilder) targetInterface;
+    AstarteServerValue astarteServerValue =
+        astarteServerValueBuilder.build(interfacePath, payload, timestamp);
+
+    if (astarteServerValue == null) {
+      return;
+    }
+
+    if (targetInterface instanceof AstarteServerPropertyInterface) {
+      try {
+        if (astarteServerValue.getValue() != null) {
+          savePropertyToStorage(astarteInterface, interfacePath, astarteServerValue.getValue());
+        } else {
+          removePropertyFromStorage(astarteInterface, interfacePath);
         }
+      } catch (AstartePropertyStorageException e) {
+        System.err.println("AstartePropertyStorageException: Caching won't work " + e.getMessage());
+      }
+    }
 
-        @Override
-        public void connectionLost(Throwable cause) {
-          if (m_astarteTransportEventListener != null) {
-            m_astarteTransportEventListener.onTransportDisconnected();
-          } else {
-            System.out.println("The Connection was lost.");
-          }
-        }
+    if (!(targetInterface instanceof AstarteServerValuePublisher)) {
+      return;
+    }
 
-        @Override
-        public void messageArrived(String topic, MqttMessage message)
-            throws AstarteTransportException {
-          System.out.println("Incoming message: " + new String(message.getPayload()));
-          if (!topic.contains(m_baseTopic) || m_messageListener == null) {
-            return;
-          }
+    AstarteServerValuePublisher astarteServerValuePublisher =
+        (AstarteServerValuePublisher) targetInterface;
+    astarteServerValuePublisher.publish(astarteServerValue);
+  }
 
-          String path = topic.replace(m_baseTopic + "/", "");
-
-          // Is it a control message?
-          if (path.startsWith("control")) {
-            if (Objects.equals(path, "control/consumer/properties")) {
-              handlePurgeProperties(message.getPayload());
-            } else {
-              System.err.println("Unhandled control message!" + path);
-            }
-            return;
-          }
-
-          String astarteInterface = path.split("/")[0];
-          String interfacePath = path.replace(astarteInterface, "");
-
-          // Identify in our introspection whether the interface exists
-          if (!getDevice().hasInterface(astarteInterface)) {
-            System.err.println("Got an unexpected interface! " + astarteInterface);
-            return;
-          }
-
-          Object payload;
-          DateTime timestamp = null;
-          if (message.getPayload().length == 0) {
-            // This is a property unset
-            payload = null;
-          } else {
-            final DecodedMessage decodedMessage =
-                AstartePayload.deserialize(message.getPayload(), mBSONDecoder, mBSONCallback);
-            payload = decodedMessage.getPayload();
-            timestamp = decodedMessage.getTimestamp();
-          }
-
-          AstarteInterface targetInterface = getDevice().getInterface(astarteInterface);
-          if (targetInterface instanceof AstarteServerAggregateDatastreamInterface) {
-            // Handle as an aggregate
-            if (payload == null) {
-              return;
-            }
-            BSONObject astartePayload = (BSONObject) payload;
-            Map<String, Object> astarteAggregate = new HashMap<>();
-            // Build the map, and normalize payload where needed
-            for (String key : astartePayload.keySet()) {
-              for (Map.Entry<String, AstarteInterfaceMapping> m :
-                  targetInterface.getMappings().entrySet()) {
-                if (AstarteInterface.isPathCompatibleWithMapping(
-                    interfacePath + "/" + key, m.getValue().getPath())) {
-                  if (m.getValue().getType() == DateTime.class) {
-                    // Replace the value
-                    astarteAggregate.put(key, new DateTime(astartePayload.get(key)));
-                  } else {
-                    astarteAggregate.put(key, astartePayload.get(key));
-                  }
-                }
-              }
-            }
-
-            // Generate and stream the right event
-            AstarteServerAggregateDatastreamInterface realInterface =
-                (AstarteServerAggregateDatastreamInterface) targetInterface;
-            AstarteAggregateDatastreamEvent e =
-                new AstarteAggregateDatastreamEvent(astarteInterface, astarteAggregate, timestamp);
-            for (AstarteAggregateDatastreamEventListener listener :
-                realInterface.getAllListeners()) {
-              listener.valueReceived(e);
-            }
-          } else {
-            AstarteInterfaceMapping targetMapping = null;
-            for (Map.Entry<String, AstarteInterfaceMapping> entry :
-                targetInterface.getMappings().entrySet()) {
-              if (AstarteInterface.isPathCompatibleWithMapping(interfacePath, entry.getKey())) {
-                targetMapping = entry.getValue();
-                break;
-              }
-            }
-            if (targetMapping == null) {
-              // Couldn't find the mapping
-              System.err.println(
-                  String.format(
-                      "Got an unexpected path %s for interface %s!",
-                      interfacePath, targetInterface.getInterfaceName()));
-              return;
-            }
-
-            Object astarteValue = payload;
-            if (targetMapping.getType() == DateTime.class) {
-              // Convert manually
-              astarteValue = new DateTime(payload);
-            }
-
-            // Generate and stream the right event
-            if (targetInterface instanceof AstarteServerDatastreamInterface) {
-              AstarteServerDatastreamInterface realInterface =
-                  (AstarteServerDatastreamInterface) targetInterface;
-              AstarteDatastreamEvent e =
-                  new AstarteDatastreamEvent(
-                      astarteInterface, interfacePath, astarteValue, timestamp);
-
-              for (AstarteDatastreamEventListener listener :
-                  ((AstarteServerDatastreamInterface) targetInterface).getAllListeners()) {
-                listener.valueReceived(e);
-              }
-            } else if (targetInterface instanceof AstarteServerPropertyInterface) {
-              {
-                AstarteServerPropertyInterface realInterface =
-                    (AstarteServerPropertyInterface) targetInterface;
-
-                // Save to our property storage
-                if (m_propertyStorage != null) {
-                  try {
-                    if (astarteValue != null) {
-                      m_propertyStorage.setStoredValue(
-                          astarteInterface, interfacePath, astarteValue);
-                    } else {
-                      m_propertyStorage.removeStoredPath(astarteInterface, interfacePath);
-                    }
-                  } catch (AstartePropertyStorageException e) {
-                    System.err.println(
-                        "AstartePropertyStorageException: Caching won't work " + e.getMessage());
-                  }
-                } else {
-                  System.err.println("Property storage invalid! Caching won't work");
-                }
-
-                AstartePropertyEvent e =
-                    new AstartePropertyEvent(astarteInterface, interfacePath, astarteValue);
-
-                // Is it an unset?
-                if (astarteValue == null) {
-                  for (AstartePropertyEventListener listener :
-                      ((AstarteServerPropertyInterface) targetInterface).getAllListeners()) {
-                    listener.propertyUnset(e);
-                  }
-                } else {
-                  for (AstartePropertyEventListener listener :
-                      ((AstarteServerPropertyInterface) targetInterface).getAllListeners()) {
-                    listener.propertyReceived(e);
-                  }
-                }
-              }
-            }
-          }
-        }
-
-        @Override
-        public void deliveryComplete(IMqttDeliveryToken token) {}
-      };
+  @Override
+  public void deliveryComplete(IMqttDeliveryToken token) {}
 
   public AstarteMqttV1Transport(MutualSSLAuthenticationMqttConnectionInfo connectionInfo) {
     super(AstarteProtocolType.ASTARTE_MQTT_V1, connectionInfo);
     m_baseTopic = connectionInfo.getClientId();
 
     // Add callbacks here
-    setCallback(mMqttCallback);
+    setCallback(this);
   }
 
   @Override
