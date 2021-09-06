@@ -8,6 +8,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 ### Added
 - Add methods that generate an Astarte Device ID using either a random UUIDv4 or by deriving an UUIDv5 using unique data.
 - Astarte Device register.
+### Changed
+- Add conditional signing of the package to ease the use of jitpack.io service
 
 ## [1.0.0-rc.0] - 2021-05-10
 ### Added
