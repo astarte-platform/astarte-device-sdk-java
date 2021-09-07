@@ -32,7 +32,7 @@ public class AstarteInterfaceMapping {
     booleanCompatibilityList.add(Boolean.class);
 
     Collection<Type> stringCompatibilityList = new HashSet<>();
-    booleanCompatibilityList.add(String.class);
+    stringCompatibilityList.add(String.class);
 
     Collection<Type> dateTimeCompatibilityList = new HashSet<>();
     dateTimeCompatibilityList.add(DateTime.class);
