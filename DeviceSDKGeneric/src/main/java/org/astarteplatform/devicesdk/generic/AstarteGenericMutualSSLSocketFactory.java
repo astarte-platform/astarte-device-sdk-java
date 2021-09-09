@@ -1,9 +1,11 @@
 package org.astarteplatform.devicesdk.generic;
 
-import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.net.InetAddress;
 import java.net.Socket;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.security.KeyManagementException;
 import java.security.KeyStore;
 import java.security.KeyStoreException;
@@ -30,7 +32,9 @@ class AstarteGenericMutualSSLSocketFactory extends SSLSocketFactory {
     // CA certificate is used to authenticate server
     String caFile = System.getProperty("java.home") + "/lib/security/cacerts";
     KeyStore caStore = KeyStore.getInstance(KeyStore.getDefaultType());
-    caStore.load(new FileInputStream(caFile), null);
+    try (InputStream is = Files.newInputStream(Paths.get(caFile))) {
+      caStore.load(is, null);
+    }
     TrustManagerFactory trustManagerFactory =
         TrustManagerFactory.getInstance(TrustManagerFactory.getDefaultAlgorithm());
     trustManagerFactory.init(caStore);
