@@ -24,9 +24,9 @@ import org.bouncycastle.pkcs.PKCS10CertificationRequest;
 import org.bouncycastle.pkcs.jcajce.JcaPKCS10CertificationRequestBuilder;
 
 class AstarteGenericCryptoStore implements AstarteCryptoStore {
-  private KeyPair m_keyPair = null;
-  private Certificate m_certificate = null;
-  private AstarteGenericMutualSSLSocketFactory m_socketFactory = null;
+  private KeyPair m_keyPair;
+  private Certificate m_certificate;
+  private AstarteGenericMutualSSLSocketFactory m_socketFactory;
 
   public AstarteGenericCryptoStore() {
     // TODO: this does not store credentials in a KeyStore
