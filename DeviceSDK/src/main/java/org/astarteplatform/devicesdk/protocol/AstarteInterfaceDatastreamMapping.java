@@ -56,10 +56,10 @@ public class AstarteInterfaceDatastreamMapping extends AstarteInterfaceMapping {
     }
   }
 
-  private boolean explicitTimestamp = false;
+  private boolean explicitTimestamp;
   private MappingReliability reliability = MappingReliability.UNRELIABLE;
   private MappingRetention retention = MappingRetention.DISCARD;
-  private int expiry = 0;
+  private int expiry;
 
   static AstarteInterfaceDatastreamMapping fromJSON(JSONObject astarteMappingObject)
       throws JSONException {
