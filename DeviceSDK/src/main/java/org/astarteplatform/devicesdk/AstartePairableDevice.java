@@ -154,11 +154,13 @@ public abstract class AstartePairableDevice extends AstarteDevice
 
   @Override
   public boolean isConnected() {
-    try {
-      return mAstarteTransport.isConnected();
-    } catch (NullPointerException e) {
-      return false;
+    boolean connected;
+    if (mAstarteTransport != null) {
+      connected = mAstarteTransport.isConnected();
+    } else {
+      connected = false;
     }
+    return connected;
   }
 
   @Override
