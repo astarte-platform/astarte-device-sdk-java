@@ -13,11 +13,11 @@ import org.json.JSONException;
 public abstract class AstartePairableDevice extends AstarteDevice
     implements AstarteTransportEventListener {
   private AstartePairingHandler mPairingHandler;
-  private AstarteTransport mAstarteTransport = null;
-  private AstarteMessageListener mAstarteMessageListener = null;
-  private boolean mInitialized = false;
-  private boolean mExplicitDisconnectionRequest = false;
-  private java.util.Timer mReconnectTimer = null;
+  private AstarteTransport mAstarteTransport;
+  private AstarteMessageListener mAstarteMessageListener;
+  private boolean mInitialized;
+  private boolean mExplicitDisconnectionRequest;
+  private java.util.Timer mReconnectTimer;
 
   protected AstartePairableDevice(
       AstartePairingHandler pairingHandler,

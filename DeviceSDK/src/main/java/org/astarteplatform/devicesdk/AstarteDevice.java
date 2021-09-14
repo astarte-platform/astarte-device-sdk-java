@@ -19,7 +19,7 @@ public abstract class AstarteDevice {
   private final Map<String, AstarteInterface> mAstarteInterfaces;
   protected final AstartePropertyStorage mPropertyStorage;
   protected final AstarteFailedMessageStorage mFailedMessageStorage;
-  protected boolean mAlwaysReconnect = false;
+  protected boolean mAlwaysReconnect;
 
   AstarteDevice(
       AstarteInterfaceProvider astarteInterfaceProvider,

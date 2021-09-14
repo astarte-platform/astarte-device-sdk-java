@@ -13,11 +13,11 @@ import org.astarteplatform.devicesdk.protocol.AstarteProtocolType;
 public abstract class AstarteTransport implements AstarteProtocol {
   private final AstarteProtocolType m_astarteProtocolType;
   private AstarteDevice mDevice;
-  protected boolean m_introspectionSent = false;
-  protected AstartePropertyStorage m_propertyStorage = null;
-  protected AstarteFailedMessageStorage m_failedMessageStorage = null;
-  protected AstarteMessageListener m_messageListener = null;
-  protected AstarteTransportEventListener m_astarteTransportEventListener = null;
+  protected boolean m_introspectionSent;
+  protected AstartePropertyStorage m_propertyStorage;
+  protected AstarteFailedMessageStorage m_failedMessageStorage;
+  protected AstarteMessageListener m_messageListener;
+  protected AstarteTransportEventListener m_astarteTransportEventListener;
 
   protected AstarteTransport(AstarteProtocolType type) {
     m_astarteProtocolType = type;
