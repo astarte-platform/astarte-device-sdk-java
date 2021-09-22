@@ -1,61 +1,21 @@
 package org.astarteplatform.devicesdk.transport.mqtt;
 
-import static org.eclipse.paho.client.mqttv3.MqttException.REASON_CODE_BROKER_UNAVAILABLE;
-import static org.eclipse.paho.client.mqttv3.MqttException.REASON_CODE_CLIENT_CLOSED;
-import static org.eclipse.paho.client.mqttv3.MqttException.REASON_CODE_CLIENT_DISCONNECTING;
-import static org.eclipse.paho.client.mqttv3.MqttException.REASON_CODE_CLIENT_EXCEPTION;
-import static org.eclipse.paho.client.mqttv3.MqttException.REASON_CODE_CLIENT_NOT_CONNECTED;
-import static org.eclipse.paho.client.mqttv3.MqttException.REASON_CODE_CLIENT_TIMEOUT;
-import static org.eclipse.paho.client.mqttv3.MqttException.REASON_CODE_CONNECTION_LOST;
-import static org.eclipse.paho.client.mqttv3.MqttException.REASON_CODE_MAX_INFLIGHT;
-import static org.eclipse.paho.client.mqttv3.MqttException.REASON_CODE_WRITE_TIMEOUT;
+import static org.eclipse.paho.client.mqttv3.MqttException.*;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
+import java.util.*;
 import java.util.zip.InflaterInputStream;
 import org.astarteplatform.devicesdk.AstartePropertyStorageException;
-import org.astarteplatform.devicesdk.protocol.AstarteAggregateDatastreamEvent;
-import org.astarteplatform.devicesdk.protocol.AstarteAggregateDatastreamEventListener;
-import org.astarteplatform.devicesdk.protocol.AstarteAggregateDatastreamInterface;
-import org.astarteplatform.devicesdk.protocol.AstarteDatastreamEvent;
-import org.astarteplatform.devicesdk.protocol.AstarteDatastreamEventListener;
-import org.astarteplatform.devicesdk.protocol.AstarteDatastreamInterface;
-import org.astarteplatform.devicesdk.protocol.AstarteDevicePropertyInterface;
-import org.astarteplatform.devicesdk.protocol.AstarteInterface;
-import org.astarteplatform.devicesdk.protocol.AstarteInterfaceDatastreamMapping;
-import org.astarteplatform.devicesdk.protocol.AstarteInterfaceMapping;
-import org.astarteplatform.devicesdk.protocol.AstarteInterfaceMappingNotFoundException;
-import org.astarteplatform.devicesdk.protocol.AstartePropertyEvent;
-import org.astarteplatform.devicesdk.protocol.AstartePropertyEventListener;
-import org.astarteplatform.devicesdk.protocol.AstarteProtocolType;
-import org.astarteplatform.devicesdk.protocol.AstarteServerAggregateDatastreamInterface;
-import org.astarteplatform.devicesdk.protocol.AstarteServerDatastreamInterface;
-import org.astarteplatform.devicesdk.protocol.AstarteServerPropertyInterface;
+import org.astarteplatform.devicesdk.protocol.*;
 import org.astarteplatform.devicesdk.transport.AstarteFailedMessage;
 import org.astarteplatform.devicesdk.transport.AstarteFailedMessageStorage;
 import org.astarteplatform.devicesdk.transport.AstarteTransportException;
-import org.bson.BSONCallback;
-import org.bson.BSONDecoder;
-import org.bson.BSONObject;
-import org.bson.BasicBSONCallback;
-import org.bson.BasicBSONDecoder;
-import org.bson.BsonBinaryWriter;
-import org.bson.Document;
+import org.bson.*;
 import org.bson.codecs.DocumentCodec;
 import org.bson.codecs.EncoderContext;
 import org.bson.io.BasicOutputBuffer;
-import org.eclipse.paho.client.mqttv3.IMqttDeliveryToken;
-import org.eclipse.paho.client.mqttv3.IMqttToken;
-import org.eclipse.paho.client.mqttv3.MqttCallback;
-import org.eclipse.paho.client.mqttv3.MqttCallbackExtended;
-import org.eclipse.paho.client.mqttv3.MqttException;
-import org.eclipse.paho.client.mqttv3.MqttMessage;
+import org.eclipse.paho.client.mqttv3.*;
 import org.joda.time.DateTime;
 
 public class AstarteMqttV1Transport extends AstarteMqttTransport {
@@ -352,9 +312,7 @@ public class AstarteMqttV1Transport extends AstarteMqttTransport {
     if (astarteInterface instanceof AstarteDatastreamInterface) {
       try {
         // Find a matching mapping
-        mapping =
-            (AstarteInterfaceDatastreamMapping)
-                AstarteInterface.findMappingInInterface(astarteInterface, path);
+        mapping = (AstarteInterfaceDatastreamMapping) astarteInterface.findMappingInInterface(path);
       } catch (AstarteInterfaceMappingNotFoundException e) {
         throw new AstarteTransportException("Mapping not found", e);
       }

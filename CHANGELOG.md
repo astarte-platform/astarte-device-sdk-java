@@ -5,7 +5,12 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
 ## [1.1.0-dev] - Unreleased
+### Added
+- Sending data on an endpoint not present in interface now triggers an exception.
+- Sending an object with fewer data than needed now triggers an exception.
+- Sending a non-numeric value on an endpoint with type Double now triggers an exception.
 ### Changed
+- Data is now validated against their exact types.
 - Update Gradle to latest stable 7.2
 - [android] Update Android Gradle plugin and Android target version
 
