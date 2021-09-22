@@ -18,7 +18,7 @@ public class AstarteDeviceDatastreamInterface extends AstarteDatastreamInterface
   public void streamData(String path, Object payload, DateTime timestamp)
       throws AstarteTransportException, AstarteInvalidValueException,
           AstarteInterfaceMappingNotFoundException {
-    validatePayload(this, path, payload, timestamp);
+    validatePayload(path, payload, timestamp);
 
     AstarteTransport transport = getAstarteTransport();
     if (transport == null) {

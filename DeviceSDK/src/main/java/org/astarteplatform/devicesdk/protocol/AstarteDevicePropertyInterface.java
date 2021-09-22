@@ -15,7 +15,7 @@ public class AstarteDevicePropertyInterface extends AstartePropertyInterface
   public void setProperty(String path, Object payload)
       throws AstarteTransportException, AstarteInvalidValueException,
           AstarteInterfaceMappingNotFoundException {
-    validatePayload(this, path, payload, null);
+    validatePayload(path, payload, null);
 
     AstarteTransport transport = getAstarteTransport();
     if (transport == null) {
