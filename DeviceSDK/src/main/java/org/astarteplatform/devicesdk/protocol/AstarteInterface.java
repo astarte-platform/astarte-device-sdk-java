@@ -104,79 +104,22 @@ public abstract class AstarteInterface {
     return astarteInterface;
   }
 
-  public static AstarteInterfaceMapping findMappingInInterface(
-      AstarteInterface astarteInterface, String path)
+  public AstarteInterfaceMapping findMappingInInterface(String path)
       throws AstarteInterfaceMappingNotFoundException {
 
-    for (Map.Entry<String, AstarteInterfaceMapping> mappingEntry :
-        astarteInterface.getMappings().entrySet()) {
+    for (Map.Entry<String, AstarteInterfaceMapping> mappingEntry : getMappings().entrySet()) {
       if (isPathCompatibleWithMapping(path, mappingEntry.getKey())) {
         return mappingEntry.getValue();
       }
     }
 
     throw new AstarteInterfaceMappingNotFoundException(
-        "Mapping " + path + " not found in interface " + astarteInterface);
+        "Mapping " + path + " not found in interface " + this);
   }
 
-  public static void validatePayload(AstarteInterface astarteInterface, String path, Object payload)
+  public void validatePayload(String path, Object payload, DateTime timestamp)
       throws AstarteInvalidValueException, AstarteInterfaceMappingNotFoundException {
-    validatePayload(astarteInterface, path, payload, null);
-  }
-
-  public static void validatePayload(
-      AstarteInterface astarteInterface, String path, Object payload, DateTime timestamp)
-      throws AstarteInvalidValueException, AstarteInterfaceMappingNotFoundException {
-    validatePayload(findMappingInInterface(astarteInterface, path), payload, timestamp);
-  }
-
-  public static void validatePayload(AstarteInterfaceMapping mapping, Object payload)
-      throws AstarteInvalidValueException {
-    if (!mapping.isTypeCompatible(payload.getClass())) {
-      throw new AstarteInvalidValueException(
-          "Payload type "
-              + payload.getClass()
-              + " is incompatible with mapping type "
-              + mapping.getType());
-    }
-  }
-
-  public static void validatePayload(
-      AstarteInterfaceMapping mapping, Object payload, DateTime timestamp)
-      throws AstarteInvalidValueException {
-    validatePayload(mapping, payload);
-
-    // Act differently depending on the mapping type
-    if (mapping instanceof AstarteInterfaceDatastreamMapping) {
-      AstarteInterfaceDatastreamMapping datastreamMapping =
-          (AstarteInterfaceDatastreamMapping) mapping;
-      if (datastreamMapping.isExplicitTimestamp() && timestamp == null) {
-        throw new AstarteInvalidValueException(
-            "This mapping has an explicit timestamp, " + "but no timestamp has been specified.");
-      }
-    } else if (timestamp != null) {
-      // FIXME: Maybe go easier, and just throw a warning?
-      throw new AstarteInvalidValueException(
-          "When sending a property, explicit timestamp " + "is always ignored");
-    }
-  }
-
-  public static void validateAggregate(
-      AstarteInterface astarteInterface,
-      String pathPrefix,
-      Map<String, Object> payload,
-      DateTime timestamp)
-      throws AstarteInvalidValueException, AstarteInterfaceMappingNotFoundException {
-    // We need to ensure the path list matches
-    if (astarteInterface.getMappings().size() != payload.size()) {
-      throw new AstarteInterfaceMappingNotFoundException(
-          "The interface mapping and the payload don't match.");
-    }
-    for (Map.Entry<String, Object> payloadEntry : payload.entrySet()) {
-      String path = pathPrefix + "/" + payloadEntry.getKey();
-      validatePayload(
-          findMappingInInterface(astarteInterface, path), payloadEntry.getValue(), timestamp);
-    }
+    findMappingInInterface(path).validatePayload(payload, timestamp);
   }
 
   public static boolean isPathCompatibleWithMapping(String path, String mapping) {

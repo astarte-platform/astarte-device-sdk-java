@@ -1,5 +1,6 @@
 package org.astarteplatform.devicesdk.protocol;
 
+import org.joda.time.DateTime;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -61,7 +62,7 @@ public class AstarteInterfaceDatastreamMapping extends AstarteInterfaceMapping {
   private MappingRetention retention = MappingRetention.DISCARD;
   private int expiry = 0;
 
-  static AstarteInterfaceDatastreamMapping fromJSON(JSONObject astarteMappingObject)
+  protected static AstarteInterfaceDatastreamMapping fromJSON(JSONObject astarteMappingObject)
       throws JSONException {
     AstarteInterfaceDatastreamMapping astarteInterfaceDatastreamMapping =
         new AstarteInterfaceDatastreamMapping();
@@ -103,5 +104,14 @@ public class AstarteInterfaceDatastreamMapping extends AstarteInterfaceMapping {
 
   public int getExpiry() {
     return expiry;
+  }
+
+  public void validatePayload(Object payload, DateTime timestamp)
+      throws AstarteInvalidValueException {
+    validatePayload(payload);
+    if (isExplicitTimestamp() && timestamp == null) {
+      throw new AstarteInvalidValueException(
+          "This mapping has an explicit timestamp, but no timestamp has been specified.");
+    }
   }
 }
