@@ -10,9 +10,17 @@ import java.util.Map;
 import org.astarteplatform.devicesdk.AstartePropertyStorage;
 import org.astarteplatform.devicesdk.protocol.AstarteInterface;
 import org.astarteplatform.devicesdk.protocol.AstarteInterfaceMapping;
+import org.astarteplatform.devicesdk.util.AstartePayload;
+import org.astarteplatform.devicesdk.util.DecodedMessage;
+import org.bson.BSONCallback;
+import org.bson.BSONDecoder;
+import org.bson.BasicBSONCallback;
+import org.bson.BasicBSONDecoder;
 import org.joda.time.DateTime;
 
 class AstarteAndroidPropertyStorage implements AstartePropertyStorage {
+  private final BSONDecoder mBSONDecoder = new BasicBSONDecoder();
+  private final BSONCallback mBSONCallback = new BasicBSONCallback();
   private final Context rootContext;
   private final String sharedPreferencesKeyPrefix;
   private final Map<String, SharedPreferences> sharedPreferencesCache;
@@ -52,38 +60,10 @@ class AstarteAndroidPropertyStorage implements AstartePropertyStorage {
               preferencesEntry.getKey(), entry.getKey())) {
             continue;
           }
-
-          if (entry.getValue().getType() == String.class) {
-            returnedPaths.put(
-                preferencesEntry.getKey(),
-                interfaceSharedPreference.getString(preferencesEntry.getKey(), null));
-          } else if (entry.getValue().getType() == Integer.class) {
-            returnedPaths.put(
-                preferencesEntry.getKey(),
-                interfaceSharedPreference.getInt(preferencesEntry.getKey(), 0));
-          } else if (entry.getValue().getType() == Long.class) {
-            returnedPaths.put(
-                preferencesEntry.getKey(),
-                interfaceSharedPreference.getLong(preferencesEntry.getKey(), 0));
-          } else if (entry.getValue().getType() == Boolean.class) {
-            returnedPaths.put(
-                preferencesEntry.getKey(),
-                interfaceSharedPreference.getBoolean(preferencesEntry.getKey(), false));
-          } else if (entry.getValue().getType() == Double.class) {
-            returnedPaths.put(
-                preferencesEntry.getKey(),
-                (double) interfaceSharedPreference.getFloat(preferencesEntry.getKey(), 0));
-          } else if (entry.getValue().getType() == Byte[].class) {
-            String encodedValue =
-                interfaceSharedPreference.getString(preferencesEntry.getKey(), null);
-            returnedPaths.put(
-                preferencesEntry.getKey(), Base64.decode(encodedValue, Base64.DEFAULT));
-          } else if (entry.getValue().getType() == DateTime.class) {
-            String dtAsString =
-                interfaceSharedPreference.getString(preferencesEntry.getKey(), null);
-            DateTime dt = DateTime.parse(dtAsString);
-            returnedPaths.put(preferencesEntry.getKey(), dt);
-          }
+          String key = preferencesEntry.getKey();
+          final AstarteInterfaceMapping mapping = entry.getValue();
+          Object value = get(interfaceSharedPreference, mapping, key, mBSONDecoder, mBSONCallback);
+          returnedPaths.put(key, value);
         }
       }
 
@@ -95,26 +75,7 @@ class AstarteAndroidPropertyStorage implements AstartePropertyStorage {
   public void setStoredValue(String interfaceName, String path, Object value) {
     synchronized (this) {
       SharedPreferences interfaceSharedPreference = getSharedPreferencesFor(interfaceName);
-
-      SharedPreferences.Editor editor = interfaceSharedPreference.edit();
-      if (value instanceof String) {
-        editor.putString(path, (String) value);
-      } else if (value.getClass() == int.class) {
-        editor.putInt(path, (int) value);
-      } else if (value.getClass() == long.class) {
-        editor.putLong(path, (long) value);
-      } else if (value.getClass() == boolean.class) {
-        editor.putBoolean(path, (boolean) value);
-      } else if (value.getClass() == double.class) {
-        editor.putFloat(path, (float) value);
-      } else if (value instanceof byte[]) {
-        byte[] byteArray = (byte[]) value;
-        editor.putString(path, Base64.encodeToString(byteArray, Base64.DEFAULT));
-      } else if (value instanceof DateTime) {
-        editor.putString(path, value.toString());
-      }
-
-      editor.apply();
+      put(interfaceSharedPreference, path, value);
     }
   }
 
@@ -145,7 +106,7 @@ class AstarteAndroidPropertyStorage implements AstartePropertyStorage {
     }
   }
 
-  private SharedPreferences getSharedPreferencesFor(String astarteInterfaceName) {
+  protected SharedPreferences getSharedPreferencesFor(String astarteInterfaceName) {
     SharedPreferences interfaceSharedPreference;
     if (!sharedPreferencesCache.containsKey(astarteInterfaceName)) {
       interfaceSharedPreference =
@@ -157,5 +118,58 @@ class AstarteAndroidPropertyStorage implements AstartePropertyStorage {
     }
 
     return interfaceSharedPreference;
+  }
+
+  protected static void put(
+      SharedPreferences interfaceSharedPreference, String path, Object value) {
+    SharedPreferences.Editor editor = interfaceSharedPreference.edit();
+    if (value instanceof String) {
+      editor.putString(path, (String) value);
+    } else if (value.getClass() == Integer.class) {
+      editor.putInt(path, (int) value);
+    } else if (value.getClass() == Long.class) {
+      editor.putLong(path, (long) value);
+    } else if (value.getClass() == Boolean.class) {
+      editor.putBoolean(path, (boolean) value);
+    } else if (value.getClass() == Double.class) {
+      editor.putFloat(path, (float) value);
+    } else if (value.getClass().isArray()) {
+      byte[] byteArray = AstartePayload.serialize(value, null);
+      editor.putString(path, Base64.encodeToString(byteArray, Base64.DEFAULT));
+    } else if (value instanceof DateTime) {
+      editor.putString(path, value.toString());
+    }
+
+    editor.apply();
+  }
+
+  protected static Object get(
+      SharedPreferences interfaceSharedPreference,
+      AstarteInterfaceMapping mapping,
+      String key,
+      BSONDecoder mBSONDecoder,
+      BSONCallback mBSONCallback) {
+    if (mapping.getType() == String.class) {
+      return interfaceSharedPreference.getString(key, null);
+    } else if (mapping.getType() == Integer.class) {
+      return interfaceSharedPreference.getInt(key, 0);
+    } else if (mapping.getType() == Long.class) {
+      return interfaceSharedPreference.getLong(key, 0);
+    } else if (mapping.getType() == Boolean.class) {
+      return interfaceSharedPreference.getBoolean(key, false);
+    } else if (mapping.getType() == Double.class) {
+      return (double) interfaceSharedPreference.getFloat(key, 0);
+    } else if (((Class) mapping.getType()).isArray()) {
+      String encodedValue = interfaceSharedPreference.getString(key, null);
+      final byte[] value = Base64.decode(encodedValue, Base64.DEFAULT);
+      final DecodedMessage decodedValue =
+          AstartePayload.deserialize(value, mBSONDecoder, mBSONCallback);
+      return decodedValue.getPayload();
+    } else if (mapping.getType() == DateTime.class) {
+      String dtAsString = interfaceSharedPreference.getString(key, null);
+      DateTime dt = DateTime.parse(dtAsString);
+      return dt;
+    }
+    return null;
   }
 }

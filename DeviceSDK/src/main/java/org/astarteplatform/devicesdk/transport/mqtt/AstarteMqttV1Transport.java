@@ -11,10 +11,9 @@ import org.astarteplatform.devicesdk.protocol.*;
 import org.astarteplatform.devicesdk.transport.AstarteFailedMessage;
 import org.astarteplatform.devicesdk.transport.AstarteFailedMessageStorage;
 import org.astarteplatform.devicesdk.transport.AstarteTransportException;
+import org.astarteplatform.devicesdk.util.AstartePayload;
+import org.astarteplatform.devicesdk.util.DecodedMessage;
 import org.bson.*;
-import org.bson.codecs.DocumentCodec;
-import org.bson.codecs.EncoderContext;
-import org.bson.io.BasicOutputBuffer;
 import org.eclipse.paho.client.mqttv3.*;
 import org.joda.time.DateTime;
 
@@ -77,15 +76,10 @@ public class AstarteMqttV1Transport extends AstarteMqttTransport {
             // This is a property unset
             payload = null;
           } else {
-            // Parse the BSON payload
-            mBSONCallback.reset();
-            mBSONDecoder.decode(message.getPayload(), mBSONCallback);
-            BSONObject astartePayload = (BSONObject) mBSONCallback.get();
-            // Parse the BSON value
-            payload = astartePayload.get("v");
-            if (astartePayload.containsField("t")) {
-              timestamp = new DateTime(astartePayload.get("t"));
-            }
+            final DecodedMessage decodedMessage =
+                AstartePayload.deserialize(message.getPayload(), mBSONDecoder, mBSONCallback);
+            payload = decodedMessage.getPayload();
+            timestamp = decodedMessage.getTimestamp();
           }
 
           AstarteInterface targetInterface = getDevice().getInterface(astarteInterface);
@@ -320,7 +314,8 @@ public class AstarteMqttV1Transport extends AstarteMqttTransport {
     }
 
     String topic = m_baseTopic + "/" + astarteInterface.getInterfaceName() + path;
-    byte[] payload = objectToEncodedBSON(value, timestamp);
+    byte[] payload =
+        AstartePayload.serialize(value, (timestamp != null) ? timestamp.toDate() : null);
 
     try {
       doSendMqttMessage(topic, payload, qos);
@@ -352,7 +347,7 @@ public class AstarteMqttV1Transport extends AstarteMqttTransport {
     }
 
     String topic = m_baseTopic + "/" + astarteInterface.getInterfaceName() + path;
-    byte[] payload = objectToEncodedBSON(value, timestamp);
+    byte[] payload = AstartePayload.serialize(value, timestamp.toDate());
 
     try {
       doSendMqttMessage(topic, payload, qos);
@@ -461,46 +456,6 @@ public class AstarteMqttV1Transport extends AstarteMqttTransport {
 
   private void doSendMqttMessage(String topic, MqttMessage mqttMessage) throws MqttException {
     m_client.publish(topic, mqttMessage);
-  }
-
-  private byte[] objectToEncodedBSON(Object o, DateTime t) {
-    if (o == null) {
-      // When handling unsets in Astarte MQTT v1, send an empty payload
-      return new byte[] {};
-    }
-
-    HashMap<String, Object> bsonJavaObject = new HashMap<>();
-
-    if (o instanceof DateTime) {
-      // Special case for DateTime
-      bsonJavaObject.put("v", ((DateTime) o).toDate());
-    } else if (o instanceof Map) {
-      // Check if the Map contains Date objects and replace them
-      @SuppressWarnings("unchecked")
-      Map<String, Object> aggregate = (Map) o;
-      for (Map.Entry<String, Object> entry : aggregate.entrySet()) {
-        if (entry.getValue() instanceof DateTime) {
-          entry.setValue(((DateTime) entry.getValue()).toDate());
-        }
-      }
-      bsonJavaObject.put("v", aggregate);
-    } else {
-      bsonJavaObject.put("v", o);
-    }
-    if (t != null) {
-      bsonJavaObject.put("t", t.toDate());
-    }
-    Document bsonDocument = new Document(bsonJavaObject);
-
-    BasicOutputBuffer out = new BasicOutputBuffer();
-    byte[] documentAsByteArray = null;
-
-    try (BsonBinaryWriter w = new BsonBinaryWriter(out)) {
-      new DocumentCodec().encode(w, bsonDocument, EncoderContext.builder().build());
-      documentAsByteArray = out.toByteArray();
-    }
-
-    return documentAsByteArray;
   }
 
   @Override

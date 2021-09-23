@@ -38,6 +38,10 @@ android {
 	lintOptions {
 		disable 'InvalidPackage'
 	}
+
+	testOptions {
+		unitTests.includeAndroidResources = true
+	}
 }
 
 repositories {
@@ -55,11 +59,13 @@ dependencies {
 	annotationProcessor "androidx.room:room-compiler:$room_version"
 	androidTestImplementation "androidx.room:room-testing:$room_version"
 
-	testImplementation 'junit:junit:4.12'
-	androidTestImplementation 'androidx.test:runner:1.2.0'
-	androidTestImplementation 'androidx.test.espresso:espresso-core:3.2.0'
+	testImplementation 'junit:junit:4.13'
+	androidTestImplementation 'androidx.test:runner:1.4.0'
 	androidTestImplementation 'org.mongodb:bson:3.11.0'
 	androidTestImplementation 'com.squareup.okhttp3:okhttp:3.12.1'
+	// Optional -- Mockito framework
+	testImplementation 'org.mockito:mockito-core:3.12.4'
+	androidTestImplementation 'com.linkedin.dexmaker:dexmaker-mockito:2.28.1'
 }
 
 task javadoc(type: Javadoc) {

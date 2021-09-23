@@ -214,4 +214,247 @@ public class AstarteInterfaceMappingTest {
       System.out.println(e.getMessage());
     }
   }
+
+  @Test
+  public void typeIntArray() {
+    String interf =
+        "{\n"
+            + "     \"endpoint\": \"/integer\",\n"
+            + "     \"type\": \"integerarray\",\n"
+            + "   }\n";
+
+    JSONObject jsonInterface = new JSONObject(interf);
+    AstarteInterfaceMapping astarteInterfaceMapping =
+        AstarteInterfaceMapping.fromJSON(jsonInterface);
+    assertTrue("mapping type integer", astarteInterfaceMapping.isTypeCompatible(Integer[].class));
+  }
+
+  @Test
+  public void typeBadIntArray() {
+    String interf =
+        "{\n"
+            + "     \"endpoint\": \"/integer\",\n"
+            + "     \"type\": \"integerarray\",\n"
+            + "   }\n";
+
+    JSONObject jsonInterface = new JSONObject(interf);
+    AstarteInterfaceMapping astarteInterfaceMapping =
+        AstarteInterfaceMapping.fromJSON(jsonInterface);
+    assertFalse(
+        "mapping type integer with wrong type",
+        astarteInterfaceMapping.isTypeCompatible(Integer.class));
+  }
+
+  @Test
+  public void typeStringArray() {
+    String interf =
+        "{\n"
+            + "     \"endpoint\": \"/string\",\n"
+            + "     \"type\": \"stringarray\",\n"
+            + "   }\n";
+
+    JSONObject jsonInterface = new JSONObject(interf);
+    AstarteInterfaceMapping astarteInterfaceMapping =
+        AstarteInterfaceMapping.fromJSON(jsonInterface);
+    assertTrue("mapping type string", astarteInterfaceMapping.isTypeCompatible(String[].class));
+  }
+
+  @Test
+  public void typeBadStringArray() {
+    String interf =
+        "{\n"
+            + "     \"endpoint\": \"/string\",\n"
+            + "     \"type\": \"stringarray\",\n"
+            + "   }\n";
+
+    JSONObject jsonInterface = new JSONObject(interf);
+    AstarteInterfaceMapping astarteInterfaceMapping =
+        AstarteInterfaceMapping.fromJSON(jsonInterface);
+    assertFalse(
+        "mapping type string with wrong type",
+        astarteInterfaceMapping.isTypeCompatible(String.class));
+  }
+
+  @Test
+  public void typeDoubleArray() {
+    String interf =
+        "{\n"
+            + "     \"endpoint\": \"/double\",\n"
+            + "     \"type\": \"doublearray\",\n"
+            + "   }\n";
+
+    JSONObject jsonInterface = new JSONObject(interf);
+    AstarteInterfaceMapping astarteInterfaceMapping =
+        AstarteInterfaceMapping.fromJSON(jsonInterface);
+    assertTrue("mapping type double", astarteInterfaceMapping.isTypeCompatible(Double[].class));
+  }
+
+  @Test
+  public void typeBadDoubleArray() {
+    String interf =
+        "{\n"
+            + "     \"endpoint\": \"/double\",\n"
+            + "     \"type\": \"doublearray\",\n"
+            + "   }\n";
+
+    JSONObject jsonInterface = new JSONObject(interf);
+    AstarteInterfaceMapping astarteInterfaceMapping =
+        AstarteInterfaceMapping.fromJSON(jsonInterface);
+    assertFalse(
+        "mapping type double with wrong type",
+        astarteInterfaceMapping.isTypeCompatible(Double.class));
+  }
+
+  @Test
+  public void typeLongIntegerArray() {
+    String interf =
+        "{\n"
+            + "     \"endpoint\": \"/longinteger\",\n"
+            + "     \"type\": \"longintegerarray\",\n"
+            + "   }\n";
+
+    JSONObject jsonInterface = new JSONObject(interf);
+    AstarteInterfaceMapping astarteInterfaceMapping =
+        AstarteInterfaceMapping.fromJSON(jsonInterface);
+    assertTrue("mapping type Long", astarteInterfaceMapping.isTypeCompatible(Long[].class));
+  }
+
+  @Test
+  public void typeBadLongIntegerArray() {
+    String interf =
+        "{\n"
+            + "     \"endpoint\": \"/longinteger\",\n"
+            + "     \"type\": \"longintegerarray\",\n"
+            + "   }\n";
+
+    JSONObject jsonInterface = new JSONObject(interf);
+    AstarteInterfaceMapping astarteInterfaceMapping =
+        AstarteInterfaceMapping.fromJSON(jsonInterface);
+    assertFalse(
+        "mapping type Long with wrong type", astarteInterfaceMapping.isTypeCompatible(Long.class));
+  }
+
+  @Test
+  public void typeBooleanArray() {
+    String interf =
+        "{\n"
+            + "     \"endpoint\": \"/boolean\",\n"
+            + "     \"type\": \"booleanarray\",\n"
+            + "   }\n";
+
+    JSONObject jsonInterface = new JSONObject(interf);
+    AstarteInterfaceMapping astarteInterfaceMapping =
+        AstarteInterfaceMapping.fromJSON(jsonInterface);
+    assertTrue("mapping type boolean", astarteInterfaceMapping.isTypeCompatible(Boolean[].class));
+  }
+
+  @Test
+  public void typeBadBooleanArray() {
+    String interf =
+        "{\n"
+            + "     \"endpoint\": \"/boolean\",\n"
+            + "     \"type\": \"booleanarray\",\n"
+            + "   }\n";
+
+    JSONObject jsonInterface = new JSONObject(interf);
+    AstarteInterfaceMapping astarteInterfaceMapping =
+        AstarteInterfaceMapping.fromJSON(jsonInterface);
+    assertFalse(
+        "mapping type boolean with wrong type",
+        astarteInterfaceMapping.isTypeCompatible(Boolean.class));
+  }
+
+  @Test
+  public void typeBinaryBlobArray() {
+    String interf =
+        "{\n"
+            + "     \"endpoint\": \"/binaryblob\",\n"
+            + "     \"type\": \"binaryblobarray\",\n"
+            + "   }\n";
+
+    JSONObject jsonInterface = new JSONObject(interf);
+    AstarteInterfaceMapping astarteInterfaceMapping =
+        AstarteInterfaceMapping.fromJSON(jsonInterface);
+    assertTrue("mapping type binaryblob", astarteInterfaceMapping.isTypeCompatible(Byte[][].class));
+  }
+
+  @Test
+  public void typeBadBinaryBlobArray() {
+    String interf =
+        "{\n"
+            + "     \"endpoint\": \"/binaryblob\",\n"
+            + "     \"type\": \"binaryblobarray\",\n"
+            + "   }\n";
+
+    JSONObject jsonInterface = new JSONObject(interf);
+    AstarteInterfaceMapping astarteInterfaceMapping =
+        AstarteInterfaceMapping.fromJSON(jsonInterface);
+    assertFalse(
+        "mapping type binaryblob with wrong type",
+        astarteInterfaceMapping.isTypeCompatible(Byte[].class));
+  }
+
+  @Test
+  public void typeDatetimeArray() {
+    String interf =
+        "{\n"
+            + "     \"endpoint\": \"/datetime\",\n"
+            + "     \"type\": \"datetimearray\",\n"
+            + "   }\n";
+
+    JSONObject jsonInterface = new JSONObject(interf);
+    AstarteInterfaceMapping astarteInterfaceMapping =
+        AstarteInterfaceMapping.fromJSON(jsonInterface);
+    assertTrue("mapping type datetime", astarteInterfaceMapping.isTypeCompatible(DateTime[].class));
+  }
+
+  @Test
+  public void typeBadDatetimeArray() {
+    String interf =
+        "{\n"
+            + "     \"endpoint\": \"/datetime\",\n"
+            + "     \"type\": \"datetimearray\",\n"
+            + "   }\n";
+
+    JSONObject jsonInterface = new JSONObject(interf);
+    AstarteInterfaceMapping astarteInterfaceMapping =
+        AstarteInterfaceMapping.fromJSON(jsonInterface);
+    assertFalse(
+        "mapping type datetime with wrong type",
+        astarteInterfaceMapping.isTypeCompatible(DateTime.class));
+  }
+
+  @Test
+  public void ValidateDoubleArray() throws AstarteInvalidValueException {
+    String interf =
+        "{\n"
+            + "     \"endpoint\": \"/double\",\n"
+            + "     \"type\": \"doublearray\",\n"
+            + "   }\n";
+
+    JSONObject jsonInterface = new JSONObject(interf);
+    AstarteInterfaceMapping astarteInterfaceMapping =
+        AstarteInterfaceMapping.fromJSON(jsonInterface);
+    Object payload = new Double[] {3.0, 1.0};
+    astarteInterfaceMapping.validatePayload(payload);
+  }
+
+  @Test
+  public void ValidateNaNDoubleArray() {
+    String interf =
+        "{\n"
+            + "     \"endpoint\": \"/double\",\n"
+            + "     \"type\": \"doublearray\",\n"
+            + "   }\n";
+
+    JSONObject jsonInterface = new JSONObject(interf);
+    AstarteInterfaceMapping astarteInterfaceMapping =
+        AstarteInterfaceMapping.fromJSON(jsonInterface);
+    try {
+      Object payload = new Double[] {1.0, Double.NaN};
+      astarteInterfaceMapping.validatePayload(payload);
+    } catch (AstarteInvalidValueException e) {
+      System.out.println(e.getMessage());
+    }
+  }
 }
