@@ -3,6 +3,7 @@ package org.astarteplatform.devicesdk.generic;
 import static org.junit.Assert.*;
 
 import java.util.Date;
+import org.astarteplatform.devicesdk.util.AstartePayload;
 import org.bson.*;
 import org.bson.types.Decimal128;
 import org.joda.time.DateTime;
@@ -16,9 +17,9 @@ public class AstarteGenericPropertyStorageTest {
   public void testSerializeInt32() {
     int intExpected = 32;
 
-    byte[] serialized = AstarteGenericPropertyStorage.serialize(intExpected);
+    byte[] serialized = AstartePayload.serialize(intExpected, null);
     Object intDes =
-        AstarteGenericPropertyStorage.deserialize(serialized, mBSONCallback, mBSONDecoder);
+        AstartePayload.deserialize(serialized, mBSONDecoder, mBSONCallback).getPayload();
 
     assertEquals("validate deserialized int", intExpected, intDes);
   }
@@ -27,9 +28,9 @@ public class AstarteGenericPropertyStorageTest {
   public void testSerializeInt64() {
     long longExpected = 32;
 
-    byte[] serialized = AstarteGenericPropertyStorage.serialize(longExpected);
+    byte[] serialized = AstartePayload.serialize(longExpected, null);
     Object longDes =
-        AstarteGenericPropertyStorage.deserialize(serialized, mBSONCallback, mBSONDecoder);
+        AstartePayload.deserialize(serialized, mBSONDecoder, mBSONCallback).getPayload();
 
     assertEquals("validate deserialized long", longExpected, longDes);
   }
@@ -38,8 +39,8 @@ public class AstarteGenericPropertyStorageTest {
   public void testSerializeString() {
     String strExpected = "hello world";
 
-    byte[] serialized = AstarteGenericPropertyStorage.serialize(strExpected);
-    Object str = AstarteGenericPropertyStorage.deserialize(serialized, mBSONCallback, mBSONDecoder);
+    byte[] serialized = AstartePayload.serialize(strExpected, null);
+    Object str = AstartePayload.deserialize(serialized, mBSONDecoder, mBSONCallback).getPayload();
 
     assertEquals("validate deserialized string ", strExpected, str);
   }
@@ -48,9 +49,9 @@ public class AstarteGenericPropertyStorageTest {
   public void testSerializeDecimal128() {
     Decimal128 decimal128Expected = new Decimal128(128);
 
-    byte[] serialized = AstarteGenericPropertyStorage.serialize(decimal128Expected);
+    byte[] serialized = AstartePayload.serialize(decimal128Expected, null);
     Object decimal128Des =
-        AstarteGenericPropertyStorage.deserialize(serialized, mBSONCallback, mBSONDecoder);
+        AstartePayload.deserialize(serialized, mBSONDecoder, mBSONCallback).getPayload();
 
     assertEquals("validate deserialized decimal 128", decimal128Expected, decimal128Des);
   }
@@ -59,9 +60,9 @@ public class AstarteGenericPropertyStorageTest {
   public void testSerializeDouble() {
     double doubleExpected = 10.8;
 
-    byte[] serialized = AstarteGenericPropertyStorage.serialize(doubleExpected);
+    byte[] serialized = AstartePayload.serialize(doubleExpected, null);
     Object doubleDes =
-        AstarteGenericPropertyStorage.deserialize(serialized, mBSONCallback, mBSONDecoder);
+        AstartePayload.deserialize(serialized, mBSONDecoder, mBSONCallback).getPayload();
 
     assertEquals("validate deserialized double", doubleExpected, doubleDes);
   }
@@ -70,9 +71,9 @@ public class AstarteGenericPropertyStorageTest {
   public void testSerializeBoolean() {
     boolean boolExpected = true;
 
-    byte[] serialized = AstarteGenericPropertyStorage.serialize(boolExpected);
+    byte[] serialized = AstartePayload.serialize(boolExpected, null);
     Object booleanDes =
-        AstarteGenericPropertyStorage.deserialize(serialized, mBSONCallback, mBSONDecoder);
+        AstartePayload.deserialize(serialized, mBSONDecoder, mBSONCallback).getPayload();
 
     assertEquals("validate deserialized boolean", boolExpected, booleanDes);
   }
@@ -81,9 +82,9 @@ public class AstarteGenericPropertyStorageTest {
   public void testSerializeDate() {
     Date dateExpected = new DateTime(System.currentTimeMillis()).toDate();
 
-    byte[] serialized = AstarteGenericPropertyStorage.serialize(dateExpected);
+    byte[] serialized = AstartePayload.serialize(dateExpected, null);
     Object dateDes =
-        AstarteGenericPropertyStorage.deserialize(serialized, mBSONCallback, mBSONDecoder);
+        AstartePayload.deserialize(serialized, mBSONDecoder, mBSONCallback).getPayload();
 
     assertEquals("validate deserialized date", dateExpected, dateDes);
   }
@@ -92,11 +93,23 @@ public class AstarteGenericPropertyStorageTest {
   public void testSerializeBinary() {
     byte[] binaryExpected = {0x1, 0x2, 0x3, 0x4};
 
-    byte[] serialized = AstarteGenericPropertyStorage.serialize(binaryExpected);
+    byte[] serialized = AstartePayload.serialize(binaryExpected, null);
     Object binaryDes =
-        AstarteGenericPropertyStorage.deserialize(serialized, mBSONCallback, mBSONDecoder);
+        AstartePayload.deserialize(serialized, mBSONDecoder, mBSONCallback).getPayload();
 
     assertTrue("validate deserialized binary ", binaryDes instanceof byte[]);
     assertArrayEquals("validate deserialized binary", binaryExpected, (byte[]) binaryDes);
+  }
+
+  @Test
+  public void testSerializeIntegerArray() {
+    Integer[] intExpected = {1, 2, 3};
+
+    byte[] serialized = AstartePayload.serialize(intExpected, null);
+    Object intDes =
+        AstartePayload.deserialize(serialized, mBSONDecoder, mBSONCallback).getPayload();
+
+    assertTrue("validate deserialized Integer ", intDes instanceof Integer[]);
+    assertArrayEquals("validate deserialized Integer", intExpected, (Integer[]) intDes);
   }
 }
