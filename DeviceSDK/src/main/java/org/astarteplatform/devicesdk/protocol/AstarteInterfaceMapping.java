@@ -1,7 +1,6 @@
 package org.astarteplatform.devicesdk.protocol;
 
 import java.lang.reflect.Type;
-import java.util.Objects;
 import org.joda.time.DateTime;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -9,6 +8,7 @@ import org.json.JSONObject;
 public class AstarteInterfaceMapping {
   private String path;
   private Type type;
+  private Type primitiveArrayType;
 
   protected static AstarteInterfaceMapping fromJSON(JSONObject astarteMappingObject)
       throws JSONException {
@@ -20,6 +20,7 @@ public class AstarteInterfaceMapping {
   protected void parseMappingFromJSON(JSONObject astarteMappingObject) throws JSONException {
     path = astarteMappingObject.getString("endpoint");
     type = stringToJavaType(astarteMappingObject.getString("type"));
+    primitiveArrayType = stringToPrimitiveArrayJavaType(astarteMappingObject.getString("type"));
   }
 
   public String getPath() {
@@ -31,7 +32,7 @@ public class AstarteInterfaceMapping {
   }
 
   protected boolean isTypeCompatible(Type otherType) {
-    return (getType() == otherType);
+    return otherType == this.type || otherType == this.primitiveArrayType;
   }
 
   public void validatePayload(Object payload) throws AstarteInvalidValueException {
@@ -41,10 +42,29 @@ public class AstarteInterfaceMapping {
               "Value incompatible with parameter type for %s: %s expected, %s found",
               getPath(), getType(), payload.getClass()));
     }
-    if (payload instanceof Double && !Double.isFinite((Double) payload)) {
+    if (payload instanceof Double && !isFinite((Double) payload)) {
       throw new AstarteInvalidValueException(
           String.format("Value per %s cannot be NaN", getPath()));
     }
+    if (payload instanceof Double[]) {
+      final Double[] arrayPayload = (Double[]) payload;
+      for (Double value : arrayPayload) {
+        if (!isFinite(value)) {
+          throw new AstarteInvalidValueException(
+              String.format("Value per %s cannot be NaN", getPath()));
+        }
+      }
+    }
+  }
+
+  /**
+   * Replacement for Double.isFinite function for better compatibility with Android SDK < 24
+   *
+   * @param value The number to check
+   * @return true if value is a finite number
+   */
+  private static boolean isFinite(Double value) {
+    return !(value.isInfinite() || value.isNaN());
   }
 
   public void validatePayload(Object payload, DateTime timestamp)
@@ -53,22 +73,56 @@ public class AstarteInterfaceMapping {
   }
 
   private static Type stringToJavaType(String typeString) {
-    if (Objects.equals(typeString, "string")) {
-      return String.class;
-    } else if (Objects.equals(typeString, "integer")) {
-      return Integer.class;
-    } else if (Objects.equals(typeString, "double")) {
-      return Double.class;
-    } else if (Objects.equals(typeString, "longinteger")) {
-      return Long.class;
-    } else if (Objects.equals(typeString, "boolean")) {
-      return Boolean.class;
-    } else if (Objects.equals(typeString, "binaryblob")) {
-      return Byte[].class;
-    } else if (Objects.equals(typeString, "datetime")) {
-      return DateTime.class;
+    switch (typeString) {
+      case "string":
+        return String.class;
+      case "integer":
+        return Integer.class;
+      case "double":
+        return Double.class;
+      case "longinteger":
+        return Long.class;
+      case "boolean":
+        return Boolean.class;
+      case "binaryblob":
+        return Byte[].class;
+      case "datetime":
+        return DateTime.class;
+      case "stringarray":
+        return String[].class;
+      case "integerarray":
+        return Integer[].class;
+      case "doublearray":
+        return Double[].class;
+      case "longintegerarray":
+        return Long[].class;
+      case "booleanarray":
+        return Boolean[].class;
+      case "binaryblobarray":
+        return Byte[][].class;
+      case "datetimearray":
+        return DateTime[].class;
+      default:
+        return Object.class;
     }
+  }
 
-    return Object.class;
+  private static Type stringToPrimitiveArrayJavaType(String typeString) {
+    switch (typeString) {
+      case "binaryblob":
+        return byte[].class;
+      case "integerarray":
+        return int[].class;
+      case "doublearray":
+        return double[].class;
+      case "longintegerarray":
+        return long[].class;
+      case "booleanarray":
+        return boolean[].class;
+      case "binaryblobarray":
+        return byte[][].class;
+      default:
+        return null;
+    }
   }
 }
