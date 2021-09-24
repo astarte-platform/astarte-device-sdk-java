@@ -9,6 +9,9 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 - Add methods that generate an Astarte Device ID using either a random UUIDv4 or by deriving an UUIDv5 using unique data.
 - Astarte Device register.
 
+### Fixed
+- [android] Fix Astarte Device id generation.
+
 ## [1.0.0-rc.0] - 2021-05-10
 ### Added
 - [generic] Support to Maven Repository publish
