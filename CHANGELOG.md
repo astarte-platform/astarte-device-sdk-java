@@ -22,6 +22,9 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 ### Changed
 - Add conditional signing of the package to ease the use of jitpack.io service
 
+### Fixed
+- [android] Fix Astarte Device id generation.
+
 ## [1.0.0-rc.0] - 2021-05-10
 ### Added
 - [generic] Support to Maven Repository publish

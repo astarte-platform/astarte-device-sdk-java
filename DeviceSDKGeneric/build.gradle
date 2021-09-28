@@ -21,9 +21,7 @@ dependencies {
 	api 'com.j256.ormlite:ormlite-jdbc:5.1'
 	implementation 'org.mongodb:bson:3.11.0'
 
-	intTestImplementation 'junit:junit:4.13'
-	intTestImplementation 'org.hamcrest:hamcrest:2.2'
-	intTestImplementation 'com.h2database:h2:1.4.200'
+	testImplementation 'junit:junit:4.13'
 }
 
 task integrationTest(type: Test) {
