@@ -4,6 +4,7 @@ import java.util.Map;
 import org.astarteplatform.devicesdk.AstarteDevice;
 import org.astarteplatform.devicesdk.AstarteMessageListener;
 import org.astarteplatform.devicesdk.AstartePropertyStorage;
+import org.astarteplatform.devicesdk.AstartePropertyStorageException;
 import org.astarteplatform.devicesdk.crypto.AstarteCryptoException;
 import org.astarteplatform.devicesdk.protocol.AstarteAggregateDatastreamInterface;
 import org.astarteplatform.devicesdk.protocol.AstarteInterface;
@@ -86,5 +87,23 @@ public abstract class AstarteTransport implements AstarteProtocol {
       AstarteAggregateDatastreamInterface astarteInterface, String path, Map<String, Object> value)
       throws AstarteTransportException {
     sendAggregate(astarteInterface, path, value, null);
+  }
+
+  protected void savePropertyToStorage(String interfaceName, String path, Object value)
+      throws AstartePropertyStorageException {
+    if (m_propertyStorage != null) {
+      m_propertyStorage.setStoredValue(interfaceName, path, value);
+    } else {
+      System.err.println("Property storage invalid! Caching won't work");
+    }
+  }
+
+  protected void removePropertyFromStorage(String interfaceName, String path)
+      throws AstartePropertyStorageException {
+    if (m_propertyStorage != null) {
+      m_propertyStorage.removeStoredPath(interfaceName, path);
+    } else {
+      System.err.println("Property storage invalid! Caching won't work");
+    }
   }
 }
