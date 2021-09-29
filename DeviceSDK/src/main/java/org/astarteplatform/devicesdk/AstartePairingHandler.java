@@ -1,6 +1,8 @@
 package org.astarteplatform.devicesdk;
 
 import java.security.cert.Certificate;
+import java.security.cert.X509Certificate;
+import java.util.Date;
 import java.util.List;
 import org.astarteplatform.devicesdk.crypto.AstarteCryptoStore;
 import org.astarteplatform.devicesdk.transport.AstarteTransport;
@@ -52,7 +54,22 @@ public class AstartePairingHandler {
   }
 
   public boolean isCertificateAvailable() {
-    return m_cryptoStore.getCertificate() != null;
+    final Certificate certificate = m_cryptoStore.getCertificate();
+    if (certificate == null) {
+      return false;
+    }
+
+    if (certificate instanceof X509Certificate) {
+      final Date notBefore = ((X509Certificate) certificate).getNotBefore();
+      final Date notAfter = ((X509Certificate) certificate).getNotAfter();
+      final Date now = new Date();
+
+      return notBefore.before(now) && notAfter.after(now);
+    }
+
+    // in the remote case it is not a x509 certificate we fall back on the previous behaviour to
+    // only chek if certificate is present
+    return true;
   }
 
   private void reloadTransports() throws AstartePairingException {

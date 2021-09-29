@@ -117,6 +117,10 @@ public abstract class AstartePairableDevice extends AstarteDevice
         return;
       }
 
+      if (!mPairingHandler.isCertificateAvailable()) {
+        mPairingHandler.requestNewCertificate();
+      }
+
       try {
         mAstarteTransport.connect();
       } catch (AstarteCryptoException e) {
