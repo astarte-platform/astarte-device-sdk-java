@@ -7,6 +7,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 ## [1.1.0-dev] - Unreleased
 ### Added
 - Add support to array-type endpoints.
+- Add support for multiple date formats for datetime and datetimearray values
 - Sending data on an endpoint not present in interface now triggers an exception.
 - Sending an object with fewer data than needed now triggers an exception.
 - Sending a non-numeric value on an endpoint with type Double now triggers an exception.

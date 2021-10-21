@@ -1,8 +1,7 @@
 package org.astarteplatform.devicesdk.util;
 
 import java.lang.reflect.Array;
-import java.util.Date;
-import java.util.Map;
+import java.util.*;
 import org.bson.*;
 import org.bson.types.BasicBSONList;
 import org.joda.time.DateTime;
@@ -17,6 +16,8 @@ public class AstartePayload {
       // When handling unsets in Astarte MQTT v1, send an empty payload
       return new byte[] {};
     }
+
+    o = prepareDateTimeValues(o);
 
     final BasicBSONObject bsonObject = new BasicBSONObject();
     bsonObject.append("v", o);
@@ -35,25 +36,40 @@ public class AstartePayload {
     // Parse the BSON value
 
     final Object decodedObject = astartePayload.get("v");
-    if (decodedObject instanceof BasicBSONList) {
+    if (decodedObject instanceof Date) {
+      decoded.setPayload(new DateTime(decodedObject));
+    } else if (decodedObject instanceof BasicBSONList) {
       BasicBSONList list = (BasicBSONList) decodedObject;
-      decoded.setPayload(bsonListToArray(list));
+      final Object[] valueArray = bsonListToArray(list);
+      if (valueArray instanceof Date[]) {
+        decoded.setPayload(dateArrayToDateTimeArray((Date[]) valueArray));
+      } else {
+        decoded.setPayload(valueArray);
+      }
     } else {
       if (decodedObject instanceof BasicBSONObject) {
         Map<String, Object> map = (BasicBSONObject) decodedObject;
         for (String key : map.keySet()) {
           Object value = map.get(key);
-          if (value instanceof BasicBSONList) {
-            map.put(key, bsonListToArray((BasicBSONList) value));
+          if (value instanceof Date) {
+            map.put(key, new DateTime(value));
+          } else if (value instanceof BasicBSONList) {
+            final Object[] valueArray = bsonListToArray((BasicBSONList) value);
+            if (valueArray instanceof Date[]) {
+              map.put(key, dateArrayToDateTimeArray((Date[]) valueArray));
+            } else {
+              map.put(key, valueArray);
+            }
           }
         }
       }
-
       decoded.setPayload(decodedObject);
     }
+
     if (astartePayload.containsField("t")) {
       decoded.setTimestamp(new DateTime(astartePayload.get("t")));
     }
+
     return decoded;
   }
 
@@ -66,5 +82,48 @@ public class AstartePayload {
     Object[] test = (Object[]) Array.newInstance(clazz, size);
     System.arraycopy(list.toArray(), 0, test, 0, size);
     return test;
+  }
+
+  /**
+   * Change all occurrences of DateTime Values to java.util.Date for easier serialization.
+   *
+   * @param o The Payload to prepare for serialization
+   * @return The Payload ready to be serialized
+   */
+  private static Object prepareDateTimeValues(Object o) {
+    if (o instanceof DateTime) {
+      return ((DateTime) o).toDate();
+    }
+    if (o instanceof DateTime[]) {
+      return dateTimesArrayToDateList((DateTime[]) o);
+    }
+    if (o instanceof Map) {
+      Map<String, Object> aggregate = new HashMap<String, Object>((Map) o);
+      for (Map.Entry<String, Object> entry : aggregate.entrySet()) {
+        if (entry.getValue() instanceof DateTime) {
+          entry.setValue(((DateTime) entry.getValue()).toDate());
+        } else if (entry.getValue() instanceof DateTime[]) {
+          entry.setValue(dateTimesArrayToDateList((DateTime[]) entry.getValue()));
+        }
+      }
+      return aggregate;
+    }
+    return o;
+  }
+
+  private static List<Date> dateTimesArrayToDateList(DateTime[] in) {
+    List<Date> out = new ArrayList<>();
+    for (DateTime d : in) {
+      out.add(d.toDate());
+    }
+    return out;
+  }
+
+  private static DateTime[] dateArrayToDateTimeArray(Date[] in) {
+    DateTime[] out = new DateTime[in.length];
+    for (int i = 0; i < in.length; i++) {
+      out[i] = new DateTime(in[i]);
+    }
+    return out;
   }
 }
