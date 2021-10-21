@@ -12,6 +12,7 @@ import org.bson.BSONCallback;
 import org.bson.BSONDecoder;
 import org.bson.BasicBSONCallback;
 import org.bson.BasicBSONDecoder;
+import org.joda.time.DateTime;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -71,5 +72,19 @@ public class AstarteAndroidPropertyStorageTest {
 
     assertTrue("validate deserialized Integer Array", decoded instanceof byte[][]);
     assertArrayEquals(value, (byte[][]) decoded);
+  }
+
+  @Test
+  public void testSerializeDateTime() {
+    when(mapping.getType()).thenReturn(DateTime.class);
+    DateTime value = new DateTime();
+    final SharedPreferences preferences =
+        this.context.getSharedPreferences("astarte.property_store.test", Context.MODE_PRIVATE);
+    AstarteAndroidPropertyStorage.put(preferences, key, value);
+    final Object decoded =
+        AstarteAndroidPropertyStorage.get(preferences, mapping, key, mBSONDecoder, mBSONCallback);
+
+    assertTrue("validate deserialized Integer Array", decoded instanceof DateTime);
+    assertEquals(value, decoded);
   }
 }

@@ -2,7 +2,6 @@ package org.astarteplatform.devicesdk.generic;
 
 import static org.junit.Assert.*;
 
-import java.util.Date;
 import org.astarteplatform.devicesdk.util.AstartePayload;
 import org.bson.*;
 import org.bson.types.Decimal128;
@@ -80,7 +79,7 @@ public class AstarteGenericPropertyStorageTest {
 
   @Test
   public void testSerializeDate() {
-    Date dateExpected = new DateTime(System.currentTimeMillis()).toDate();
+    DateTime dateExpected = new DateTime(System.currentTimeMillis());
 
     byte[] serialized = AstartePayload.serialize(dateExpected, null);
     Object dateDes =
