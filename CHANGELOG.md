@@ -19,6 +19,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 ## [1.0.4] - Unreleased
 ### Added
 - Add check that prevents sending an interface with both major and minor version set to 0
+- Add capability to dynamically update the introspection
 
 ## [1.0.3] - 2022-07-05
 

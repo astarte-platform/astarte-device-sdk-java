@@ -4,12 +4,7 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 import org.astarteplatform.devicesdk.crypto.AstarteCryptoException;
-import org.astarteplatform.devicesdk.protocol.AstarteGlobalEventListener;
-import org.astarteplatform.devicesdk.protocol.AstarteInterface;
-import org.astarteplatform.devicesdk.protocol.AstarteInvalidInterfaceException;
-import org.astarteplatform.devicesdk.protocol.AstarteServerAggregateDatastreamInterface;
-import org.astarteplatform.devicesdk.protocol.AstarteServerDatastreamInterface;
-import org.astarteplatform.devicesdk.protocol.AstarteServerPropertyInterface;
+import org.astarteplatform.devicesdk.protocol.*;
 import org.astarteplatform.devicesdk.transport.AstarteFailedMessageStorage;
 import org.astarteplatform.devicesdk.transport.AstarteTransportException;
 import org.json.JSONException;
@@ -38,6 +33,46 @@ public abstract class AstarteDevice {
 
   public boolean hasInterface(String interfaceName) {
     return mAstarteInterfaces.containsKey(interfaceName);
+  }
+
+  /**
+   * Method that adds an interface dynamically to the introspection
+   *
+   * @param astarteInterfaceObject the JSONObject representation of the interface
+   * @throws AstarteInvalidInterfaceException when the JSON Object does not represent an interface
+   *     correctly
+   * @throws AstarteInterfaceAlreadyPresentException when an interface with the same name, major and
+   *     minor is already present
+   */
+  public void addInterface(JSONObject astarteInterfaceObject)
+      throws AstarteInvalidInterfaceException, AstarteInterfaceAlreadyPresentException {
+    AstarteInterface newInterface =
+        AstarteInterface.fromJSON(astarteInterfaceObject, mPropertyStorage);
+    AstarteInterface formerInterface = getInterface(newInterface.getInterfaceName());
+    if (formerInterface != null
+        && formerInterface.getMajorVersion() == newInterface.getMajorVersion()) {
+      if (formerInterface.getMinorVersion() == newInterface.getMinorVersion()) {
+        throw new AstarteInterfaceAlreadyPresentException("Interface already present in mapping");
+      }
+      if (formerInterface.getMinorVersion() > newInterface.getMinorVersion()) {
+        throw new AstarteInvalidInterfaceException("Can't downgrade an interface at runtime");
+      }
+    }
+    mAstarteInterfaces.put(newInterface.getInterfaceName(), newInterface);
+  }
+
+  /**
+   * Method that dynamically removes an interface from the introspection
+   *
+   * @param interfaceName The name of the interface to remove
+   * @throws AstarteInterfaceNotFoundException when no interface is found with the given name
+   */
+  public void removeInterface(String interfaceName) throws AstarteInterfaceNotFoundException {
+    AstarteInterface formerInterface = getInterface(interfaceName);
+    if (formerInterface == null) {
+      throw new AstarteInterfaceNotFoundException("Interface " + interfaceName + " not found");
+    }
+    mAstarteInterfaces.remove(interfaceName);
   }
 
   public Collection<String> getAllInterfaceNames() {
