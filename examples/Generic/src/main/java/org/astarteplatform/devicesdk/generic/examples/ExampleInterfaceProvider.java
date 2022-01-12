@@ -20,23 +20,35 @@ public class ExampleInterfaceProvider implements AstarteInterfaceProvider {
      */
     String[] interfaceNames = {
       "org.astarte-platform.genericsensors.AvailableSensors",
-      "org.astarte-platform.genericsensors.SamplingRate",
-      "org.astarte-platform.genericsensors.Values"
+      "org.astarte-platform.genericsensors.SamplingRate"
     };
     Collection<JSONObject> interfaces = new HashSet<>();
 
     for (String interfaceName : interfaceNames) {
-      InputStream is =
-          ClassLoader.getSystemClassLoader()
-              .getResourceAsStream("standard-interfaces/" + interfaceName + ".json");
-      JSONTokener tokener = new JSONTokener(is);
-
       try {
-        interfaces.add(new JSONObject(tokener));
+        interfaces.add(loadInterface(interfaceName));
       } catch (Exception e) {
         e.printStackTrace();
       }
     }
     return interfaces;
+  }
+
+  @Override
+  public JSONObject loadInterface(String interfaceName) {
+    /*
+     * loadInterface must return the interface witch the given interface name.
+     *
+     * Here we load the interface from JSON files that is in the resource folder.
+     *
+     */
+    InputStream is =
+        ClassLoader.getSystemClassLoader()
+            .getResourceAsStream("standard-interfaces/" + interfaceName + ".json");
+    if (is == null) {
+      return null;
+    }
+    JSONTokener tokener = new JSONTokener(is);
+    return new JSONObject(tokener);
   }
 }

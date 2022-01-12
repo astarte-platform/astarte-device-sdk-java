@@ -47,4 +47,9 @@ public class TestInterfaceProvider implements AstarteInterfaceProvider {
     }
     return interfaces;
   }
+
+  @Override
+  public JSONObject loadInterface(String interfaceName) {
+    return null;
+  }
 }
