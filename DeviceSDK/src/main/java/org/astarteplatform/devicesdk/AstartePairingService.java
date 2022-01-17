@@ -9,7 +9,6 @@ import java.security.cert.X509Certificate;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Optional;
 import okhttp3.*;
 import org.apache.commons.io.IOUtils;
 import org.astarteplatform.devicesdk.crypto.AstarteCryptoStore;
@@ -85,23 +84,20 @@ public final class AstartePairingService {
             .build();
 
     try (Response response = m_httpClient.newCall(request).execute()) {
-      Optional<ResponseBody> optBody = Optional.ofNullable(response.body());
-      if (!response.isSuccessful() || !optBody.isPresent()) {
+      final ResponseBody responseBody = response.body();
+      if (!response.isSuccessful() || responseBody == null) {
         throw new AstartePairingException(
             "Request to device register API failed with "
                 + response.code()
                 + ". Returned body is "
-                + (optBody.isPresent() ? optBody.get().string() : "empty"));
+                + (responseBody != null ? responseBody.string() : "empty"));
       }
 
-      String responseBody = optBody.get().string();
-      JSONObject responseJson = new JSONObject(responseBody);
-      Optional<String> optCredentialsSecret =
-          Optional.ofNullable(responseJson.optJSONObject("data").optString("credentials_secret"));
+      String responseBodyString = responseBody.string();
+      JSONObject responseJson = new JSONObject(responseBodyString);
+      credentialsSecret = responseJson.optJSONObject("data").optString("credentials_secret");
 
-      if (optCredentialsSecret.isPresent()) {
-        credentialsSecret = optCredentialsSecret.get();
-      } else {
+      if (credentialsSecret.isEmpty()) {
         throw new AstartePairingException("Failure in calling device register API");
       }
     }
