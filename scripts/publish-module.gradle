@@ -50,9 +50,9 @@ afterEvaluate {
                     }
                     developers {
                         developer {
-                            id = 'rbino'
-                            name = 'Riccardo Binetti'
-                            email = ' riccardo.binetti@ispirata.com'
+                            id = 'harlem88'
+                            name = 'Antonio Gisondi'
+                            email = 'antonio.gisondi@secomind.com'
                         }
                     }
                     scm {
@@ -66,12 +66,13 @@ afterEvaluate {
     }
 }
 
-ext["signing.keyId"] = rootProject.ext["signing.keyId"]
 ext["signing.password"] = rootProject.ext["signing.password"]
-ext["signing.secretKeyRingFile"] = rootProject.ext["signing.secretKeyRingFile"]
+ext["signing.key"] = rootProject.ext["signing.key"]
 
 signing {
-    if( !rootProject.ext["signing.secretKeyRingFile"].toString().isEmpty() ){
-        sign publishing.publications
-    }
+    def signingKey = rootProject.ext["signing.key"].toString()
+    def signingPassword = rootProject.ext["signing.password"].toString()
+
+    useInMemoryPgpKeys(signingKey, signingPassword)
+    sign publishing.publications
 }
