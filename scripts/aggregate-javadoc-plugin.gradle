@@ -1,0 +1,37 @@
+// Adapted from https://github.com/nebula-plugins/gradle-aggregate-javadocs-plugin to add Android support
+
+class AggregateJavadocPlugin implements Plugin<Project> {
+    static final String AGGREGATE_JAVADOCS_TASK_NAME = 'aggregateJavadocs'
+
+    @Override
+    void apply(Project project) {
+        Project rootProject = project.rootProject
+        rootProject.gradle.projectsEvaluated {
+            Set<Project> javaSubprojects = getJavaSubprojects(rootProject)
+            Set<Project> androidSubprojects = getAndroidSubprojects(rootProject)
+            Set<Project> allSubprojects = javaSubprojects + androidSubprojects
+            if (!allSubprojects.isEmpty()) {
+                rootProject.task(AGGREGATE_JAVADOCS_TASK_NAME, type: Javadoc) {
+                    description = 'Aggregates Javadoc API documentation of all subprojects.'
+                    group = JavaBasePlugin.DOCUMENTATION_GROUP
+                    dependsOn allSubprojects.javadoc
+
+                    source allSubprojects.javadoc.source
+                    destinationDir rootProject.file("$rootProject.buildDir/docs/javadoc")
+                    classpath = rootProject.files(javaSubprojects.javadoc.classpath)
+                    title = "Astarte Device SDK Java"
+                }
+            }
+        }
+    }
+
+    private static Set<Project> getJavaSubprojects(Project rootProject) {
+        rootProject.subprojects.findAll { subproject -> subproject.plugins.hasPlugin(JavaPlugin) && subproject.javadoc.isEnabled()}
+    }
+
+    private static Set<Project> getAndroidSubprojects(Project rootProject) {
+        rootProject.subprojects.findAll { subproject -> subproject.plugins.findPlugin("com.android.library") && subproject.javadoc.isEnabled()}
+    }
+}
+
+apply plugin: AggregateJavadocPlugin
