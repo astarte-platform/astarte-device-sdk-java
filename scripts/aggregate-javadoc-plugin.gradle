@@ -8,15 +8,13 @@ class AggregateJavadocPlugin implements Plugin<Project> {
         Project rootProject = project.rootProject
         rootProject.gradle.projectsEvaluated {
             Set<Project> javaSubprojects = getJavaSubprojects(rootProject)
-            Set<Project> androidSubprojects = getAndroidSubprojects(rootProject)
-            Set<Project> allSubprojects = javaSubprojects + androidSubprojects
-            if (!allSubprojects.isEmpty()) {
+            if (!javaSubprojects.isEmpty()) {
                 rootProject.task(AGGREGATE_JAVADOCS_TASK_NAME, type: Javadoc) {
                     description = 'Aggregates Javadoc API documentation of all subprojects.'
                     group = JavaBasePlugin.DOCUMENTATION_GROUP
-                    dependsOn allSubprojects.javadoc
+                    dependsOn javaSubprojects.javadoc
 
-                    source allSubprojects.javadoc.source
+                    source javaSubprojects.javadoc.source
                     destinationDir rootProject.file("$rootProject.buildDir/docs/javadoc")
                     classpath = rootProject.files(javaSubprojects.javadoc.classpath)
                     title = "Astarte Device SDK Java"
