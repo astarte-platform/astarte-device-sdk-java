@@ -11,3 +11,5 @@ dependencies {
 application {
 	mainClassName = 'org.astarteplatform.devicesdk.generic.examples.ExampleDevice'
 }
+
+tasks.withType(Javadoc).all { enabled = false }
