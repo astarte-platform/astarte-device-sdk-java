@@ -4,7 +4,7 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
-## [1.1.0-dev] - Unreleased
+## [Unreleased]
 ### Added
 - Add support to array-type endpoints.
 - Add support for multiple date formats for datetime and datetimearray values
@@ -15,6 +15,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 - Data is now validated against their exact types.
 - Update Gradle to latest stable 7.2
 - [android] Update Android Gradle plugin and Android target version
+
+## [1.0.2] - 2022-04-14
 
 ## [1.0.1] - 2021-12-20
 
