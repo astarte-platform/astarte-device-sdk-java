@@ -1,0 +1,5 @@
+<resources>
+    <string name="app_name">Astarte Kotlin Demo App</string>
+    <string name="command_label">Last received command</string>
+    <string name="button_label">Publish ping</string>
+</resources>
