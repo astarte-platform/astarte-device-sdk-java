@@ -18,6 +18,7 @@ public class MutualSSLAuthenticationMqttConnectionInfo implements MqttConnection
     m_mqttConnectOptions.setMaxInflight(128);
     // We handle this at a different level.
     m_mqttConnectOptions.setAutomaticReconnect(false);
+    m_mqttConnectOptions.setCleanSession(false);
     try {
       m_mqttConnectOptions.setSocketFactory(sslSocketFactory);
     } catch (Exception e) {
