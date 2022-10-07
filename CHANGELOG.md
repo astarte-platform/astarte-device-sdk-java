@@ -21,6 +21,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 - Add check that prevents sending an interface with both major and minor version set to 0
 - Add capability to dynamically update the introspection
 - Add handle for the sessionPresent flag from the broker
+- Add check that prevents sending unchanged properties.
 
 ## [1.0.3] - 2022-07-05
 

@@ -8,6 +8,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import org.astarteplatform.devicesdk.AstartePropertyStorage;
+import org.astarteplatform.devicesdk.AstartePropertyStorageException;
 import org.astarteplatform.devicesdk.protocol.AstarteInterface;
 import org.astarteplatform.devicesdk.protocol.AstarteInterfaceMapping;
 import org.astarteplatform.devicesdk.util.AstartePayload;
@@ -44,6 +45,19 @@ class AstarteAndroidPropertyStorage implements AstartePropertyStorage {
 
       return returnedPaths;
     }
+  }
+
+  @Override
+  public Object getStoredValue(AstarteInterface astarteInterface, String path)
+      throws AstartePropertyStorageException {
+    Map<String, Object> storedValues = getStoredValuesForInterface(astarteInterface);
+    for (Map.Entry<String, Object> entry : storedValues.entrySet()) {
+      if (!AstarteInterface.isPathCompatibleWithMapping(entry.getKey(), path)) {
+        continue;
+      }
+      return entry.getValue();
+    }
+    return null;
   }
 
   @Override
