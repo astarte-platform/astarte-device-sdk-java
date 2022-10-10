@@ -86,6 +86,14 @@ public abstract class AstarteInterface {
     astarteInterface.majorVersion = astarteInterfaceObject.getInt("version_major");
     astarteInterface.minorVersion = astarteInterfaceObject.getInt("version_minor");
 
+    if (astarteInterface.majorVersion == 0 && astarteInterface.minorVersion == 0) {
+      // Invalid Major and Minor
+      throw new AstarteInvalidInterfaceException(
+          String.format(
+              "Both Major and Minor version are 0 on interface %s",
+              astarteInterface.getInterfaceName()));
+    }
+
     // Get and create mappings
     astarteInterface.mappings = new HashMap<>();
     JSONArray jsonMappings = astarteInterfaceObject.getJSONArray("mappings");
