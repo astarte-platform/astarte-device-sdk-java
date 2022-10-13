@@ -11,25 +11,43 @@ import java.security.Principal;
 import java.security.PrivateKey;
 import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
-import javax.net.ssl.KeyManager;
-import javax.net.ssl.SSLContext;
-import javax.net.ssl.SSLSocket;
-import javax.net.ssl.SSLSocketFactory;
-import javax.net.ssl.TrustManagerFactory;
-import javax.net.ssl.X509ExtendedKeyManager;
+import javax.net.ssl.*;
 
 class AstarteAndroidMutualSSLSocketFactory extends SSLSocketFactory {
   private SSLSocketFactory internalSSLSocketFactory;
 
-  public AstarteAndroidMutualSSLSocketFactory()
+  public AstarteAndroidMutualSSLSocketFactory(boolean ignoreSSLErrors)
       throws KeyManagementException, NoSuchAlgorithmException, CertificateException,
           KeyStoreException, IOException {
-    // CA certificate is used to authenticate server
-    TrustManagerFactory trustManagerFactory =
-        TrustManagerFactory.getInstance(TrustManagerFactory.getDefaultAlgorithm());
-    KeyStore caStore = KeyStore.getInstance("AndroidCAStore");
-    caStore.load(null);
-    trustManagerFactory.init(caStore);
+    TrustManager[] trustManagers;
+    if (ignoreSSLErrors) {
+      TrustManager[] trustAllCerts =
+          new TrustManager[] {
+            new X509TrustManager() {
+              @Override
+              public void checkClientTrusted(
+                  java.security.cert.X509Certificate[] chain, String authType) {}
+
+              @Override
+              public void checkServerTrusted(
+                  java.security.cert.X509Certificate[] chain, String authType) {}
+
+              @Override
+              public java.security.cert.X509Certificate[] getAcceptedIssuers() {
+                return new java.security.cert.X509Certificate[] {};
+              }
+            }
+          };
+      trustManagers = trustAllCerts;
+    } else {
+      // CA certificate is used to authenticate server
+      TrustManagerFactory trustManagerFactory =
+          TrustManagerFactory.getInstance(TrustManagerFactory.getDefaultAlgorithm());
+      KeyStore caStore = KeyStore.getInstance("AndroidCAStore");
+      caStore.load(null);
+      trustManagerFactory.init(caStore);
+      trustManagers = trustManagerFactory.getTrustManagers();
+    }
 
     // client key and certificates are sent to server so it can authenticate us
     final KeyStore androidKeyStore = KeyStore.getInstance("AndroidKeyStore");
@@ -84,7 +102,7 @@ class AstarteAndroidMutualSSLSocketFactory extends SSLSocketFactory {
 
     // finally, create SSL socket factory
     SSLContext context = SSLContext.getInstance("TLSv1.2");
-    context.init(new KeyManager[] {keyManager}, trustManagerFactory.getTrustManagers(), null);
+    context.init(new KeyManager[] {keyManager}, trustManagers, null);
 
     internalSSLSocketFactory = context.getSocketFactory();
   }

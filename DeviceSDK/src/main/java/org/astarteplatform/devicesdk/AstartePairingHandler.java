@@ -15,12 +15,15 @@ public class AstartePairingHandler {
 
   private Certificate m_certificate;
 
+  private boolean ignoreSSLErrors;
+
   public AstartePairingHandler(
       String pairingUrl,
       String astarteRealm,
       String deviceId,
       String credentialSecret,
-      AstarteCryptoStore cryptoStore) {
+      AstarteCryptoStore cryptoStore,
+      boolean ignoreSSLErrors) {
     m_astarteRealm = astarteRealm;
     m_deviceId = deviceId;
     m_credentialSecret = credentialSecret;
@@ -29,6 +32,8 @@ public class AstartePairingHandler {
     m_AstartePairingService = new AstartePairingService(pairingUrl, astarteRealm);
 
     m_certificate = m_cryptoStore.getCertificate();
+
+    this.ignoreSSLErrors = ignoreSSLErrors;
   }
 
   public void init() throws AstartePairingException {
@@ -57,7 +62,8 @@ public class AstartePairingHandler {
 
   private void reloadTransports() throws AstartePairingException {
     m_transports =
-        m_AstartePairingService.reloadTransports(m_credentialSecret, m_cryptoStore, m_deviceId);
+        m_AstartePairingService.reloadTransports(
+            m_credentialSecret, m_cryptoStore, m_deviceId, ignoreSSLErrors);
   }
 
   public void requestNewCertificate() throws AstartePairingException {

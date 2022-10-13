@@ -16,13 +16,33 @@ public class AstarteAndroidDevice extends AstartePairableDevice {
       String pairingBaseUrl,
       Context context)
       throws JSONException, AstarteInvalidInterfaceException {
+    this(
+        deviceId,
+        astarteRealm,
+        credentialSecret,
+        interfaceProvider,
+        pairingBaseUrl,
+        context,
+        false);
+  }
+
+  public AstarteAndroidDevice(
+      String deviceId,
+      String astarteRealm,
+      String credentialSecret,
+      AstarteInterfaceProvider interfaceProvider,
+      String pairingBaseUrl,
+      Context context,
+      boolean ignoreSSLErrors)
+      throws JSONException, AstarteInvalidInterfaceException {
     super(
         new AstartePairingHandler(
             pairingBaseUrl,
             astarteRealm,
             deviceId,
             credentialSecret,
-            new AstarteAndroidCryptoStore()),
+            new AstarteAndroidCryptoStore(),
+            ignoreSSLErrors),
         new AstarteAndroidPropertyStorage(context, "astarte.property_store." + deviceId),
         new AstarteAndroidFailedMessageStorage(
             AstarteAndroidRoomDatabase.getDatabase(context).astarteFailedMessageDao()),
