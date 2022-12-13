@@ -16,7 +16,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 - Update Gradle to latest stable 7.2
 - [android] Update Android Gradle plugin and Android target version
 
-## [1.0.4] - Unreleased
+## [1.0.4] - 2022-12-13
 ### Added
 - Add check that prevents sending an interface with both major and minor version set to 0
 - Add capability to dynamically update the introspection
