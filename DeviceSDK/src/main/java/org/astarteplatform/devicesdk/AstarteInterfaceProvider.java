@@ -5,4 +5,6 @@ import org.json.JSONObject;
 
 public interface AstarteInterfaceProvider {
   Collection<JSONObject> loadAllInterfaces();
+
+  JSONObject loadInterface(String interfaceName);
 }

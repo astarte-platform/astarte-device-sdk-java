@@ -92,14 +92,10 @@ public class ExampleDevice {
      * class for more details
      */
     JdbcConnectionSource connectionSource = new JdbcConnectionSource("jdbc:h2:mem:testDb");
+    ExampleInterfaceProvider interfaceProvider = new ExampleInterfaceProvider();
     AstarteDevice device =
         new AstarteGenericDevice(
-            deviceId,
-            realm,
-            credentialsSecret,
-            new ExampleInterfaceProvider(),
-            pairingUrl,
-            connectionSource);
+            deviceId, realm, credentialsSecret, interfaceProvider, pairingUrl, connectionSource);
     /*
      * Connect listeners
      *
@@ -147,6 +143,8 @@ public class ExampleDevice {
      *
      * Retrieve the interface from the device and call streamData on it.
      */
+    device.addInterface(interfaceProvider.loadInterface(valuesInterfaceName));
+
     AstarteDeviceDatastreamInterface valuesInterface =
         (AstarteDeviceDatastreamInterface) device.getInterface(valuesInterfaceName);
 

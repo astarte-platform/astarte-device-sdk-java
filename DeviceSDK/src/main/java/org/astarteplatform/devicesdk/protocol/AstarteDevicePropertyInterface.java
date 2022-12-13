@@ -22,7 +22,21 @@ public class AstarteDevicePropertyInterface extends AstartePropertyInterface
       throw new AstarteTransportException("No available transport");
     }
 
-    transport.sendIndividualValue(this, path, payload);
+    Object storedValue = null;
+
+    if (mPropertyStorage != null) {
+      try {
+        storedValue = mPropertyStorage.getStoredValue(this, path);
+      } catch (AstartePropertyStorageException e) {
+        e.printStackTrace();
+      }
+    }
+
+    // If the property changed send it
+    if (!payload.equals(storedValue)) {
+      transport.sendIndividualValue(this, path, payload);
+    }
+
     // Store it
     if (mPropertyStorage != null) {
       try {

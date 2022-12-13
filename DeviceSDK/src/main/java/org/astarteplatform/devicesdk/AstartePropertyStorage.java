@@ -11,6 +11,9 @@ public interface AstartePropertyStorage {
   List<String> getStoredPathsForInterface(String interfaceName)
       throws AstartePropertyStorageException;
 
+  Object getStoredValue(AstarteInterface astarteInterface, String path)
+      throws AstartePropertyStorageException;
+
   void setStoredValue(String interfaceName, String path, Object value)
       throws AstartePropertyStorageException;
 

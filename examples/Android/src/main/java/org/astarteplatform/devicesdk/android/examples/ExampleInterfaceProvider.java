@@ -42,6 +42,11 @@ public class ExampleInterfaceProvider implements AstarteInterfaceProvider {
     return interfaces;
   }
 
+  @Override
+  public JSONObject loadInterface(String interfaceName) {
+    return null;
+  }
+
   private String loadJSONFromAsset(String interfaceName) {
     String json = null;
     try {

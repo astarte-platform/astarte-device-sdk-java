@@ -3,12 +3,15 @@ package org.astarteplatform.devicesdk;
 import org.astarteplatform.devicesdk.crypto.AstarteCryptoException;
 import org.astarteplatform.devicesdk.crypto.AstarteCryptoStore;
 import org.astarteplatform.devicesdk.protocol.AstarteInterface;
+import org.astarteplatform.devicesdk.protocol.AstarteInterfaceAlreadyPresentException;
+import org.astarteplatform.devicesdk.protocol.AstarteInterfaceNotFoundException;
 import org.astarteplatform.devicesdk.protocol.AstarteInvalidInterfaceException;
 import org.astarteplatform.devicesdk.transport.AstarteFailedMessageStorage;
 import org.astarteplatform.devicesdk.transport.AstarteTransport;
 import org.astarteplatform.devicesdk.transport.AstarteTransportEventListener;
 import org.astarteplatform.devicesdk.transport.AstarteTransportException;
 import org.json.JSONException;
+import org.json.JSONObject;
 
 public abstract class AstartePairableDevice extends AstarteDevice
     implements AstarteTransportEventListener {
@@ -288,6 +291,51 @@ public abstract class AstartePairableDevice extends AstarteDevice
     // Set transport on all interfaces
     for (AstarteInterface astarteInterface : getAllInterfaces()) {
       astarteInterface.setAstarteTransport(mAstarteTransport);
+    }
+  }
+
+  /**
+   * Method that adds an interface dynamically to the introspection. If the device is connected the
+   * updated introspection is sent to the server.
+   *
+   * @param astarteInterfaceObject the JSONObject representation of the interface
+   * @throws AstarteInvalidInterfaceException when the JSON Object does not represent an interface
+   *     correctly
+   * @throws AstarteInterfaceAlreadyPresentException when an interface with the same name, major and
+   *     minor is already present
+   */
+  @Override
+  public void addInterface(JSONObject astarteInterfaceObject)
+      throws AstarteInvalidInterfaceException, AstarteInterfaceAlreadyPresentException {
+    super.addInterface(astarteInterfaceObject);
+    if (isConnected()) {
+      String interfaceName = astarteInterfaceObject.getString("interface_name");
+      AstarteInterface astarteInterface = getInterface(interfaceName);
+      astarteInterface.setAstarteTransport(mAstarteTransport);
+      try {
+        mAstarteTransport.sendIntrospection();
+      } catch (AstarteTransportException e) {
+        onTransportConnectionInitializationError(e);
+      }
+    }
+  }
+
+  /**
+   * Method that dynamically removes an interface from the introspection. If the device is
+   * connected, the updated introspection is sent to the server.
+   *
+   * @param interfaceName The name of the interface to remove
+   * @throws AstarteInterfaceNotFoundException when no interface is found with the given name
+   */
+  @Override
+  public void removeInterface(String interfaceName) throws AstarteInterfaceNotFoundException {
+    super.removeInterface(interfaceName);
+    if (isConnected()) {
+      try {
+        mAstarteTransport.sendIntrospection();
+      } catch (AstarteTransportException e) {
+        onTransportConnectionInitializationError(e);
+      }
     }
   }
 }

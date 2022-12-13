@@ -53,6 +53,33 @@ class AstarteGenericPropertyStorage implements AstartePropertyStorage {
   }
 
   @Override
+  public Object getStoredValue(AstarteInterface astarteInterface, String path)
+      throws AstartePropertyStorageException {
+    QueryBuilder<AstarteGenericPropertyEntry, String> statementBuilder =
+        mPropertyEntryDao.queryBuilder();
+    synchronized (this) {
+      try {
+        statementBuilder
+            .where()
+            .eq(
+                AstarteGenericPropertyEntry.INTERFACE_FIELD_NAME,
+                astarteInterface.getInterfaceName())
+            .and()
+            .like("path", "%" + path);
+        List<AstarteGenericPropertyEntry> result =
+            mPropertyEntryDao.query(statementBuilder.prepare());
+        if (result.size() == 1) {
+          return AstartePayload.deserialize(
+              result.get(0).getBSONValue(), mBSONDecoder, mBSONCallback);
+        }
+        return null;
+      } catch (SQLException e) {
+        throw new AstartePropertyStorageException("Failed to retrieve stored values", e);
+      }
+    }
+  }
+
+  @Override
   public Map<String, Object> getStoredValuesForInterface(AstarteInterface astarteInterface)
       throws AstartePropertyStorageException {
     Map<String, Object> returnedValues = new HashMap<>();
