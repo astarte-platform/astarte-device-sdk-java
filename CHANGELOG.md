@@ -13,7 +13,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 - Sending a non-numeric value on an endpoint with type Double now triggers an exception.
 ### Changed
 - Data is now validated against their exact types.
-- Update Gradle to latest stable 7.2
+- Update Gradle to latest stable 7.6
 - [android] Update Android Gradle plugin and Android target version
 
 ## [1.0.4] - 2022-12-13
