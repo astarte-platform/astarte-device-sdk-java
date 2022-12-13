@@ -69,7 +69,8 @@ class AstarteGenericPropertyStorage implements AstartePropertyStorage {
         List<AstarteGenericPropertyEntry> result =
             mPropertyEntryDao.query(statementBuilder.prepare());
         if (result.size() == 1) {
-          return deserialize(result.get(0).getBSONValue(), mBSONCallback, mBSONDecoder);
+          return AstartePayload.deserialize(
+              result.get(0).getBSONValue(), mBSONDecoder, mBSONCallback);
         }
         return null;
       } catch (SQLException e) {
