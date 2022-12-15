@@ -11,6 +11,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 - Sending data on an endpoint not present in interface now triggers an exception.
 - Sending an object with fewer data than needed now triggers an exception.
 - Sending a non-numeric value on an endpoint with type Double now triggers an exception.
+- Add support to parametric paths in object aggregated interfaces validation.
 ### Changed
 - Data is now validated against their exact types.
 - Update Gradle to latest stable 7.6
