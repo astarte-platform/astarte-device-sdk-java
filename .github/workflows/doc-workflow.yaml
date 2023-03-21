@@ -29,7 +29,7 @@ jobs:
         run: ./gradlew aggregateJavadocs
       - name: Copy Docs
         run: |
-          export DOCS_DIRNAME="$(echo ${{ github.ref }} | sed 's,refs/heads/,,' | sed 's/master/snapshot/g' | sed 's/release-//g')/device-sdks/java"
+          export DOCS_DIRNAME="device-sdks/java/$(echo ${{ github.ref }} | sed 's,refs/heads/,,' | sed 's/master/snapshot/g' | sed 's/release-//g')/api"
           rm -rf docs/$DOCS_DIRNAME
           mkdir -p docs/$DOCS_DIRNAME
           cp -r astarte-device-sdk-java/build/docs/javadoc/* docs/$DOCS_DIRNAME/
