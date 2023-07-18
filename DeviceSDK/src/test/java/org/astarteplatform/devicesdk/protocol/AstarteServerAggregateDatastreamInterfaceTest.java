@@ -23,11 +23,11 @@ public class AstarteServerAggregateDatastreamInterfaceTest {
           + "    \"aggregation\": \"object\",\n"
           + "    \"mappings\": [\n"
           + "        {\n"
-          + "            \"endpoint\": \"/test/value\",\n"
+          + "            \"endpoint\": \"/config/%{config_id}/param/%{param_id}/value\",\n"
           + "            \"type\": \"double\",\n"
           + "        },\n"
           + "        {\n"
-          + "            \"endpoint\": \"/test/name\",\n"
+          + "            \"endpoint\": \"/config/%{config_id}/param/%{param_id}/name\",\n"
           + "            \"type\": \"string\",\n"
           + "        }\n"
           + "    ]\n"
@@ -48,10 +48,11 @@ public class AstarteServerAggregateDatastreamInterfaceTest {
     expectedValues.put("value", 10.6);
     expectedValues.put("name", "build");
     AstarteServerValue astarteServerValue =
-        datastreamInterface.build("/test", expectedValues, new DateTime());
+        datastreamInterface.build("/config/1/param/2", expectedValues, new DateTime());
 
     assertNotNull("Astarte server value != NULL", astarteServerValue);
-    assertEquals("Compare interface path", astarteServerValue.getInterfacePath(), "/test");
+    assertEquals(
+        "Compare interface path", astarteServerValue.getInterfacePath(), "/config/1/param/2");
 
     Map<String, Object> rValues = astarteServerValue.getMapValue();
     assertTrue("map value not empty", rValues.size() > 0);
@@ -80,10 +81,11 @@ public class AstarteServerAggregateDatastreamInterfaceTest {
           assertTrue("map value not empty", rValues.size() > 0);
           assertEquals("Compare value endpoint", rValues.get("value"), 10.6);
           assertEquals("Compare name endpoint", rValues.get("name"), "build");
+          assertEquals("Compare path", e.getPath(), "/config/1/param/2");
         };
     datastreamInterface.addListener(listener);
     AstarteServerValue astarteServerValue =
-        datastreamInterface.build("/test", expectedValues, new DateTime());
+        datastreamInterface.build("/config/1/param/2", expectedValues, new DateTime());
 
     datastreamInterface.publish(astarteServerValue);
     datastreamInterface.removeListener(listener);
