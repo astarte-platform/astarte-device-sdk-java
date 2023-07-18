@@ -59,7 +59,10 @@ public class AstarteServerAggregateDatastreamInterface extends AstarteAggregateD
   public void publish(AstarteServerValue payload) {
     AstarteAggregateDatastreamEvent e =
         new AstarteAggregateDatastreamEvent(
-            getInterfaceName(), payload.getMapValue(), payload.getTimestamp());
+            getInterfaceName(),
+            payload.getMapValue(),
+            payload.getTimestamp(),
+            payload.getInterfacePath());
     for (AstarteAggregateDatastreamEventListener listener : mListeners) {
       listener.valueReceived(e);
     }

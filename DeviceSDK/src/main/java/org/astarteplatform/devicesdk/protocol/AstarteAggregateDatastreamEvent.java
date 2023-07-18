@@ -7,13 +7,14 @@ public class AstarteAggregateDatastreamEvent extends AstarteGenericAggregateEven
   private final DateTime mTimestamp;
 
   public AstarteAggregateDatastreamEvent(
-      String interfaceName, Map<String, Object> values, DateTime timestamp) {
-    super(interfaceName, values);
+      String interfaceName, Map<String, Object> values, DateTime timestamp, String interfacePath) {
+    super(interfaceName, values, interfacePath);
     mTimestamp = timestamp;
   }
 
-  public AstarteAggregateDatastreamEvent(String interfaceName, Map<String, Object> values) {
-    super(interfaceName, values);
+  public AstarteAggregateDatastreamEvent(
+      String interfaceName, Map<String, Object> values, String interfacePath) {
+    super(interfaceName, values, interfacePath);
     mTimestamp = null;
   }
 
