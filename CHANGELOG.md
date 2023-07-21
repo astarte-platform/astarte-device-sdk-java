@@ -4,13 +4,16 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
-## [Unreleased]
+## [1.1.0] - 2023-01-16
+
+## [1.1.0-alpha.0] - 2022-12-15
 ### Added
 - Add support to array-type endpoints.
 - Add support for multiple date formats for datetime and datetimearray values
 - Sending data on an endpoint not present in interface now triggers an exception.
 - Sending an object with fewer data than needed now triggers an exception.
 - Sending a non-numeric value on an endpoint with type Double now triggers an exception.
+- Add support to parametric paths in object aggregated interfaces validation.
 ### Changed
 - Data is now validated against their exact types.
 - Update Gradle to latest stable 7.6
