@@ -1,6 +1,7 @@
 package org.astarteplatform.devicesdk.crypto;
 
 import java.io.IOException;
+import java.security.InvalidAlgorithmParameterException;
 import java.security.KeyManagementException;
 import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
@@ -19,7 +20,9 @@ public interface AstarteCryptoStore {
 
   void setAstarteCertificate(Certificate astarteCertificate);
 
-  String generateCSR(String directoryString) throws IOException, OperatorCreationException;
+  String generateCSR(String directoryString)
+      throws IOException, OperatorCreationException, InvalidAlgorithmParameterException,
+          NoSuchAlgorithmException;
 
   SSLSocketFactory getSSLSocketFactory()
       throws KeyManagementException, NoSuchAlgorithmException, CertificateException,

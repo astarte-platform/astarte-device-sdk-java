@@ -2,6 +2,7 @@ package org.astarteplatform.devicesdk.generic;
 
 import java.io.IOException;
 import java.io.StringWriter;
+import java.security.InvalidAlgorithmParameterException;
 import java.security.KeyManagementException;
 import java.security.KeyPair;
 import java.security.KeyPairGenerator;
@@ -66,7 +67,8 @@ class AstarteGenericCryptoStore implements AstarteCryptoStore {
     m_certificate = astarteCertificate;
   }
 
-  private void generateKeyPair() throws Exception {
+  private void generateKeyPair()
+      throws NoSuchAlgorithmException, InvalidAlgorithmParameterException {
     // Clear the KeyStore first.
     clearKeyStore();
 
@@ -77,15 +79,12 @@ class AstarteGenericCryptoStore implements AstarteCryptoStore {
   }
 
   @Override
-  public String generateCSR(String directoryString) throws IOException, OperatorCreationException {
+  public String generateCSR(String directoryString)
+      throws IOException, OperatorCreationException, InvalidAlgorithmParameterException,
+          NoSuchAlgorithmException {
     if (m_keyPair == null) {
       // Generate the key first.
-      try {
-        generateKeyPair();
-      } catch (Exception e) {
-        e.printStackTrace();
-        return "";
-      }
+      generateKeyPair();
     }
     X500Name subjectName = new X500Name(directoryString);
     JcaPKCS10CertificationRequestBuilder kpGen =
