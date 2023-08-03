@@ -4,12 +4,14 @@ import android.security.keystore.KeyGenParameterSpec;
 import android.security.keystore.KeyProperties;
 import java.io.IOException;
 import java.io.StringWriter;
+import java.security.InvalidAlgorithmParameterException;
 import java.security.KeyManagementException;
 import java.security.KeyPair;
 import java.security.KeyPairGenerator;
 import java.security.KeyStore;
 import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
+import java.security.NoSuchProviderException;
 import java.security.PublicKey;
 import java.security.cert.Certificate;
 import java.security.cert.CertificateException;
@@ -99,7 +101,8 @@ class AstarteAndroidCryptoStore implements AstarteCryptoStore {
     }
   }
 
-  private void generateKeyPair() throws Exception {
+  private void generateKeyPair()
+      throws NoSuchAlgorithmException, NoSuchProviderException, InvalidAlgorithmParameterException {
     // Clear the KeyStore first.
     clearKeyStore();
 
@@ -118,15 +121,12 @@ class AstarteAndroidCryptoStore implements AstarteCryptoStore {
   }
 
   @Override
-  public String generateCSR(String directoryString) throws IOException, OperatorCreationException {
+  public String generateCSR(String directoryString)
+      throws InvalidAlgorithmParameterException, NoSuchAlgorithmException, NoSuchProviderException,
+          OperatorCreationException, IOException {
     if (m_keyPair == null) {
       // Generate the key first.
-      try {
-        generateKeyPair();
-      } catch (Exception e) {
-        e.printStackTrace();
-        return "";
-      }
+      generateKeyPair();
     }
     X500Name subjectName = new X500Name(directoryString);
     JcaPKCS10CertificationRequestBuilder kpGen =
