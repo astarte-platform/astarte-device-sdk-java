@@ -2,6 +2,7 @@ package org.astarteplatform.devicesdk.android;
 
 import android.security.keystore.KeyGenParameterSpec;
 import android.security.keystore.KeyProperties;
+import android.util.Log;
 import java.io.IOException;
 import java.io.StringWriter;
 import java.security.KeyManagementException;
@@ -27,6 +28,7 @@ class AstarteAndroidCryptoStore implements AstarteCryptoStore {
   private PublicKey m_publicKey;
   private KeyPair m_keyPair = null;
   private Certificate m_certificate;
+  private static final String TAG = "AndroidCryptoStore";
 
   public AstarteAndroidCryptoStore() {
     // See if we have something in our Android Keystore already
@@ -39,23 +41,22 @@ class AstarteAndroidCryptoStore implements AstarteCryptoStore {
       KeyStore.Entry trustedEntry = ks.getEntry("AstarteTrustedCertificate", null);
 
       if (entry == null) {
-        System.out.println("No key pair found!");
+        Log.w(TAG, "No key pair found!");
         return;
       }
 
       if (trustedEntry instanceof KeyStore.TrustedCertificateEntry) {
-        System.out.println("Found a valid, trusted Certificate for Astarte");
+        Log.i(TAG, "Found a valid, trusted Certificate for Astarte");
         m_certificate = ((KeyStore.TrustedCertificateEntry) trustedEntry).getTrustedCertificate();
-        System.out.println("Certificate successfully loaded!");
+        Log.i(TAG, "Certificate successfully loaded!");
       } else if (entry instanceof KeyStore.PrivateKeyEntry) {
         m_publicKey = ((KeyStore.PrivateKeyEntry) entry).getCertificate().getPublicKey();
-        System.out.println("Found the base Keypair.");
+        Log.i(TAG, "Found the base Keypair.");
       }
     } catch (KeyStoreException e) {
-      e.printStackTrace();
-      System.err.println("Could not load keystore!");
+      Log.e(TAG, "Could not load keystore! KeyStoreException: " + e);
     } catch (Exception e) {
-      e.printStackTrace();
+      Log.e(TAG, "Could not load keystore! KeyStoreException: " + e);
     }
   }
 
@@ -93,7 +94,7 @@ class AstarteAndroidCryptoStore implements AstarteCryptoStore {
       ks.setEntry("AstarteTrustedCertificate", entry, null);
     } catch (KeyStoreException e) {
       e.printStackTrace();
-      System.err.println("Could not load keystore!");
+      Log.e(TAG, "Could not load keystore! KeyStoreException: " + e);
     } catch (Exception e) {
       e.printStackTrace();
     }

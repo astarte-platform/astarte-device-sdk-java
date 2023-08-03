@@ -9,6 +9,7 @@ import java.security.cert.X509Certificate;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.logging.Logger;
 import okhttp3.*;
 import org.apache.commons.io.IOUtils;
 import org.astarteplatform.devicesdk.crypto.AstarteCryptoStore;
@@ -24,6 +25,7 @@ public final class AstartePairingService {
   private final String m_astarteRealm;
   private static final MediaType JSON = MediaType.parse("application/json; charset=utf-8");
   private final OkHttpClient m_httpClient;
+  private static Logger logger = Logger.getLogger(AstartePairingService.class.getName());
 
   public AstartePairingService(String pairingUrl, String astarteRealm) {
     m_astarteRealm = astarteRealm;
@@ -131,7 +133,7 @@ public final class AstartePairingService {
     JSONObject transportObjects;
     try (Response response = m_httpClient.newCall(request).execute()) {
       String responseBody = response.body().string();
-      System.out.println(responseBody);
+      logger.info("Status informations for a device :" + responseBody);
       JSONObject responseJson = new JSONObject(responseBody);
       transportObjects = responseJson.getJSONObject("data").getJSONObject("protocols");
     } catch (NullPointerException e) {
@@ -150,7 +152,7 @@ public final class AstartePairingService {
       String key = keys.next();
       AstarteProtocolType protocolType = AstarteProtocolType.fromString(key);
       if (protocolType == null) {
-        System.out.println("Found unsupported protocol " + key);
+        logger.warning("Found unsupported protocol " + key);
         continue;
       }
 
