@@ -188,7 +188,7 @@ public abstract class AstartePairableDevice extends AstarteDevice
       if (mAstarteMessageListener != null) {
         mAstarteMessageListener.onFailure(cause);
       } else {
-        cause.printStackTrace();
+        logger.severe(cause.getMessage());
       }
 
       // Disconnect and reconnect in a separate thread since we can't call
@@ -205,7 +205,7 @@ public abstract class AstartePairableDevice extends AstarteDevice
                     }
                   } catch (AstarteTransportException e) {
                     // Not much that we can do here, we are reconnecting below
-                    e.printStackTrace();
+                    logger.severe(e.getMessage());
                   }
                   eventuallyReconnect();
                 }
@@ -227,7 +227,7 @@ public abstract class AstartePairableDevice extends AstarteDevice
         } catch (AstartePairingException e) {
           if (!eventuallyReconnect()) {
             mAstarteMessageListener.onFailure(e);
-            e.printStackTrace();
+            logger.severe(e.getMessage());
           }
           return;
         }
@@ -240,7 +240,7 @@ public abstract class AstartePairableDevice extends AstarteDevice
           if (mAstarteMessageListener != null) {
             mAstarteMessageListener.onFailure(e);
           } else {
-            e.printStackTrace();
+            logger.severe(e.getMessage());
           }
         }
       } else {

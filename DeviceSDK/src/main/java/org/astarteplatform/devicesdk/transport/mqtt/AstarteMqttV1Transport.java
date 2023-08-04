@@ -399,7 +399,7 @@ public class AstarteMqttV1Transport extends AstarteMqttTransport implements Mqtt
         }
       }
     } catch (MqttException e) {
-      e.printStackTrace();
+      logger.severe(e.getMessage());
     }
   }
 
@@ -419,7 +419,7 @@ public class AstarteMqttV1Transport extends AstarteMqttTransport implements Mqtt
         result.append(new String(Arrays.copyOf(buf, rlen)));
       }
     } catch (IOException e) {
-      e.printStackTrace();
+      logger.severe(e.getMessage());
     }
 
     String purgePropertiesPayload = result.toString();

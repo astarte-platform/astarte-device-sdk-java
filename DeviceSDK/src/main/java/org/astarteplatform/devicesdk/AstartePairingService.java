@@ -166,7 +166,7 @@ public final class AstartePairingService {
                 cryptoStore);
         transports.add(supportedTransport);
       } catch (Exception e) {
-        e.printStackTrace();
+        logger.severe(e.getMessage());
       }
     }
 

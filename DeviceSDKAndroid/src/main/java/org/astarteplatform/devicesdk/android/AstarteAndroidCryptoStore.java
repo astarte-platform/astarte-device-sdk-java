@@ -69,7 +69,7 @@ class AstarteAndroidCryptoStore implements AstarteCryptoStore {
       ks.deleteEntry("AstarteCertificate");
       ks.deleteEntry("AstarteTrustedCertificate");
     } catch (Exception e) {
-      e.printStackTrace();
+      Log.e(TAG,e.getMessage());
     }
   }
 
