@@ -31,7 +31,8 @@ public class AstarteDevicePropertyInterface extends AstartePropertyInterface
       try {
         storedValue = mPropertyStorage.getStoredValue(this, path);
       } catch (AstartePropertyStorageException e) {
-        logger.severe(e.getMessage());
+        logger.severe(
+            "Error while retrieving stored value for path: " + path + ". " + e.getMessage());
       }
     }
 

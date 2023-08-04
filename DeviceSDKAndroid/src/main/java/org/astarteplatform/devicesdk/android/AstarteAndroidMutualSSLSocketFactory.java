@@ -56,7 +56,7 @@ class AstarteAndroidMutualSSLSocketFactory extends SSLSocketFactory {
                   (X509Certificate) androidKeyStore.getCertificate("AstarteTrustedCertificate");
               return new X509Certificate[] {signedClientCertificate};
             } catch (Exception e) {
-              Log.e(TAG, e.getMessage());
+              Log.e(TAG, "Error while retrieving the certificate chain: ", e);
             }
             return null;
           }
@@ -146,7 +146,7 @@ class AstarteAndroidMutualSSLSocketFactory extends SSLSocketFactory {
     try {
       socket.setReuseAddress(false);
     } catch (Exception e) {
-      Log.e(TAG, e.getMessage());
+      Log.e(TAG, "Error while setting socket reuse address: ", e);
     }
     return socket;
   }

@@ -49,9 +49,9 @@ public abstract class AstarteMqttTransport extends AstarteTransport implements I
           if (listener != null) {
             listener.onFailure(derivedException);
           } else {
-            logger.severe(derivedException.getMessage());
+            logger.severe("Error during transport failure: " + derivedException.getMessage());
           }
-          logger.severe(exception.getMessage());
+          logger.severe("Starting exception: " + exception.getMessage());
         }
       };
 
@@ -73,7 +73,7 @@ public abstract class AstarteMqttTransport extends AstarteTransport implements I
       try {
         m_client.close();
       } catch (Exception e) {
-        logger.severe(e.getMessage());
+        logger.severe("Error while closing the MQTT client: " + e.getMessage());
       }
     }
 
@@ -87,7 +87,7 @@ public abstract class AstarteMqttTransport extends AstarteTransport implements I
     try {
       m_client = new MqttAsyncClient(brokerUrl, m_connectionInfo.getClientId(), null);
     } catch (MqttException e) {
-      logger.severe(e.getMessage());
+      logger.severe("Error while initializing the MQTT client: " + e.getMessage());
     }
     m_client.setCallback(mMqttCallback);
   }
@@ -151,7 +151,7 @@ public abstract class AstarteMqttTransport extends AstarteTransport implements I
     }
 
     if (m_astarteTransportEventListener == null) {
-      logger.severe(failureCause.getMessage());
+      logger.severe("Transport failure cause: " + failureCause.getMessage());
       return;
     }
 

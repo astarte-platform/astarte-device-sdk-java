@@ -17,7 +17,7 @@ class AstarteSslUtils {
           DatatypeConverter.printBase64Binary(cert.getEncoded()).replaceAll("(.{64})", "$1\n"));
       sw.write("\n-----END CERTIFICATE-----\n");
     } catch (CertificateEncodingException e) {
-      logger.severe(e.getMessage());
+      logger.severe("Error while converting certificate to PEM format: " + e.getMessage());
     }
     return sw.toString();
   }

@@ -41,22 +41,22 @@ class AstarteAndroidCryptoStore implements AstarteCryptoStore {
       KeyStore.Entry trustedEntry = ks.getEntry("AstarteTrustedCertificate", null);
 
       if (entry == null) {
-        Log.w(TAG, "No key pair found!");
+        Log.w(TAG, "No key pair found in Android Keystore!");
         return;
       }
 
       if (trustedEntry instanceof KeyStore.TrustedCertificateEntry) {
-        Log.i(TAG, "Found a valid, trusted Certificate for Astarte");
+        Log.i(TAG, "Found a valid, trusted Certificate for Astarte in Android Keystore");
         m_certificate = ((KeyStore.TrustedCertificateEntry) trustedEntry).getTrustedCertificate();
-        Log.i(TAG, "Certificate successfully loaded!");
+        Log.i(TAG, "Certificate successfully loaded from Android Keystore!");
       } else if (entry instanceof KeyStore.PrivateKeyEntry) {
         m_publicKey = ((KeyStore.PrivateKeyEntry) entry).getCertificate().getPublicKey();
-        Log.i(TAG, "Found the base Keypair.");
+        Log.i(TAG, "Found the base Keypair in Android Keystore.");
       }
     } catch (KeyStoreException e) {
-      Log.e(TAG, "Could not load keystore! KeyStoreException: " + e);
+      Log.e(TAG, "Error while accessing Android Keystore: ", e);
     } catch (Exception e) {
-      Log.e(TAG, "Could not load keystore! KeyStoreException: " + e);
+      Log.e(TAG, "Error while loading the certificate or key: ", e);
     }
   }
 
@@ -69,7 +69,7 @@ class AstarteAndroidCryptoStore implements AstarteCryptoStore {
       ks.deleteEntry("AstarteCertificate");
       ks.deleteEntry("AstarteTrustedCertificate");
     } catch (Exception e) {
-      Log.e(TAG,e.getMessage());
+      Log.e(TAG, e.getMessage());
     }
   }
 
@@ -94,7 +94,7 @@ class AstarteAndroidCryptoStore implements AstarteCryptoStore {
       ks.setEntry("AstarteTrustedCertificate", entry, null);
     } catch (KeyStoreException e) {
       e.printStackTrace();
-      Log.e(TAG, "Could not load keystore! KeyStoreException: " + e);
+      Log.e(TAG, "Could not load keystore! KeyStoreException: ", e);
     } catch (Exception e) {
       e.printStackTrace();
     }

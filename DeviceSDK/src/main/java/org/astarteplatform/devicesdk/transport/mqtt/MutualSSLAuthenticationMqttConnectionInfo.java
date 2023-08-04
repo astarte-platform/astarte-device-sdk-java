@@ -25,7 +25,7 @@ public class MutualSSLAuthenticationMqttConnectionInfo implements MqttConnection
     try {
       m_mqttConnectOptions.setSocketFactory(sslSocketFactory);
     } catch (Exception e) {
-      logger.severe(e.getMessage());
+      logger.severe("Error while setting socket factory: " + e.getMessage());
     }
     m_clientId = astarteRealm + "/" + deviceId;
   }

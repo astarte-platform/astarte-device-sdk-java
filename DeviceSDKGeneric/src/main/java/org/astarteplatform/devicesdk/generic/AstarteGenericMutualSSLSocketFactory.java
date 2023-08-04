@@ -145,7 +145,7 @@ class AstarteGenericMutualSSLSocketFactory extends SSLSocketFactory {
     try {
       socket.setReuseAddress(false);
     } catch (Exception e) {
-      logger.severe(e.getMessage());
+      logger.severe("Error while setting socket reuse address: " + e.getMessage());
     }
     return socket;
   }

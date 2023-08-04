@@ -27,7 +27,7 @@ public class AstarteTransportFactory {
               new MutualSSLAuthenticationMqttConnectionInfo(
                   brokerUrl, astarteRealm, deviceId, cryptoStore.getSSLSocketFactory()));
         } catch (Exception e) {
-          logger.severe(e.getMessage());
+          logger.severe("Error while creating Astarte MQTT V1 Transport: " + e.getMessage());
           return null;
         }
       default:

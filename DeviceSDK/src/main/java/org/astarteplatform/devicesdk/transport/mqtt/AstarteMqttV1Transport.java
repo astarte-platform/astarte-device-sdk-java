@@ -399,7 +399,7 @@ public class AstarteMqttV1Transport extends AstarteMqttTransport implements Mqtt
         }
       }
     } catch (MqttException e) {
-      logger.severe(e.getMessage());
+      logger.severe("Error while setting up subscriptions: " + e.getMessage());
     }
   }
 
@@ -419,7 +419,7 @@ public class AstarteMqttV1Transport extends AstarteMqttTransport implements Mqtt
         result.append(new String(Arrays.copyOf(buf, rlen)));
       }
     } catch (IOException e) {
-      logger.severe(e.getMessage());
+      logger.severe("Error while handling purge properties: " + e.getMessage());
     }
 
     String purgePropertiesPayload = result.toString();

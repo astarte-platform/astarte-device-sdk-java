@@ -188,7 +188,7 @@ public abstract class AstartePairableDevice extends AstarteDevice
       if (mAstarteMessageListener != null) {
         mAstarteMessageListener.onFailure(cause);
       } else {
-        logger.severe(cause.getMessage());
+        logger.severe("Transport Connection Initialization Error: " + cause.getMessage());
       }
 
       // Disconnect and reconnect in a separate thread since we can't call
@@ -205,7 +205,7 @@ public abstract class AstartePairableDevice extends AstarteDevice
                     }
                   } catch (AstarteTransportException e) {
                     // Not much that we can do here, we are reconnecting below
-                    logger.severe(e.getMessage());
+                    logger.severe("Error while disconnecting: " + e.getMessage());
                   }
                   eventuallyReconnect();
                 }
@@ -227,7 +227,7 @@ public abstract class AstartePairableDevice extends AstarteDevice
         } catch (AstartePairingException e) {
           if (!eventuallyReconnect()) {
             mAstarteMessageListener.onFailure(e);
-            logger.severe(e.getMessage());
+            logger.severe("Error while reconnecting: " + e.getMessage());
           }
           return;
         }
@@ -240,7 +240,7 @@ public abstract class AstartePairableDevice extends AstarteDevice
           if (mAstarteMessageListener != null) {
             mAstarteMessageListener.onFailure(e);
           } else {
-            logger.severe(e.getMessage());
+            logger.severe("Error while reconnecting: " + e.getMessage());
           }
         }
       } else {
