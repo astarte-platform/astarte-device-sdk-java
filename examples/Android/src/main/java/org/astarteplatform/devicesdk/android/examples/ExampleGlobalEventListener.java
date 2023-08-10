@@ -52,6 +52,8 @@ public class ExampleGlobalEventListener extends AstarteGlobalEventListener {
         TAG,
         "Received aggregate datastream value on interface "
             + e.getInterfaceName()
+            + ", path: "
+            + e.getPath()
             + ", values: "
             + e.getValues());
   }

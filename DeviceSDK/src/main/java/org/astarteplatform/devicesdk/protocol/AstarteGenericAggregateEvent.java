@@ -1,17 +1,19 @@
 package org.astarteplatform.devicesdk.protocol;
 
 import java.lang.reflect.Type;
-import java.util.Collection;
 import java.util.Map;
 import org.joda.time.DateTime;
 
 public abstract class AstarteGenericAggregateEvent {
   private final String mInterfaceName;
+  private final String mInterfacePath;
   private final Map<String, Object> mValues;
 
-  AstarteGenericAggregateEvent(String interfaceName, Map<String, Object> values) {
+  AstarteGenericAggregateEvent(
+      String interfaceName, Map<String, Object> values, String interfacePath) {
     mInterfaceName = interfaceName;
     mValues = values;
+    mInterfacePath = interfacePath;
   }
 
   public Type valueType() {
@@ -22,8 +24,8 @@ public abstract class AstarteGenericAggregateEvent {
     return mInterfaceName;
   }
 
-  public Collection<String> getPaths() {
-    return mValues.keySet();
+  public String getPath() {
+    return mInterfacePath;
   }
 
   public boolean hasPath(String path) {
