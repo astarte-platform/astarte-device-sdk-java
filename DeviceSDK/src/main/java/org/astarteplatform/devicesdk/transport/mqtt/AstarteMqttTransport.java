@@ -1,5 +1,6 @@
 package org.astarteplatform.devicesdk.transport.mqtt;
 
+import java.util.logging.Logger;
 import javax.net.ssl.SSLHandshakeException;
 import org.astarteplatform.devicesdk.AstarteMessageListener;
 import org.astarteplatform.devicesdk.crypto.AstarteCryptoException;
@@ -16,6 +17,7 @@ public abstract class AstarteMqttTransport extends AstarteTransport implements I
   protected MqttAsyncClient m_client;
   private final MqttConnectionInfo m_connectionInfo;
   private MqttCallback mMqttCallback;
+  private static Logger logger = Logger.getLogger(AstarteMqttTransport.class.getName());
   private final IMqttActionListener mMqttActionListener =
       new IMqttActionListener() {
         public void onSuccess(IMqttToken asyncActionToken) {
@@ -47,9 +49,9 @@ public abstract class AstarteMqttTransport extends AstarteTransport implements I
           if (listener != null) {
             listener.onFailure(derivedException);
           } else {
-            derivedException.printStackTrace();
+            logger.severe("Error during transport failure: " + derivedException.getMessage());
           }
-          exception.printStackTrace();
+          logger.severe("Starting exception: " + exception.getMessage());
         }
       };
 
@@ -71,7 +73,7 @@ public abstract class AstarteMqttTransport extends AstarteTransport implements I
       try {
         m_client.close();
       } catch (Exception e) {
-        e.printStackTrace();
+        logger.severe("Error while closing the MQTT client: " + e.getMessage());
       }
     }
 
@@ -85,7 +87,7 @@ public abstract class AstarteMqttTransport extends AstarteTransport implements I
     try {
       m_client = new MqttAsyncClient(brokerUrl, m_connectionInfo.getClientId(), null);
     } catch (MqttException e) {
-      e.printStackTrace();
+      logger.severe("Error while initializing the MQTT client: " + e.getMessage());
     }
     m_client.setCallback(mMqttCallback);
   }
@@ -149,7 +151,7 @@ public abstract class AstarteMqttTransport extends AstarteTransport implements I
     }
 
     if (m_astarteTransportEventListener == null) {
-      failureCause.printStackTrace();
+      logger.severe("Transport failure cause: " + failureCause.getMessage());
       return;
     }
 

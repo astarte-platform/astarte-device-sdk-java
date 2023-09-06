@@ -3,11 +3,13 @@ package org.astarteplatform.devicesdk.protocol;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.Map;
+import java.util.logging.Logger;
 import org.joda.time.DateTime;
 
 public class AstarteServerDatastreamInterface extends AstarteDatastreamInterface
     implements AstarteServerValueBuilder, AstarteServerValuePublisher {
   private final Collection<AstarteDatastreamEventListener> mListeners;
+  private static Logger logger = Logger.getLogger(AstarteServerDatastreamInterface.class.getName());
 
   AstarteServerDatastreamInterface() {
     mListeners = new HashSet<>();
@@ -51,9 +53,8 @@ public class AstarteServerDatastreamInterface extends AstarteDatastreamInterface
               .build();
     } else {
       // Couldn't find the mapping
-      System.err.printf(
-          "Got an unexpected path %s for interface %s!%n", interfacePath, getInterfaceName());
-
+      logger.severe(
+          "Got an unexpected path '" + interfacePath + "' for interface " + getInterfaceName());
       astarteServerValue = null;
     }
 

@@ -1,5 +1,6 @@
 package org.astarteplatform.devicesdk.transport.mqtt;
 
+import java.util.logging.Logger;
 import javax.net.ssl.SSLSocketFactory;
 import org.eclipse.paho.client.mqttv3.MqttConnectOptions;
 
@@ -7,6 +8,8 @@ public class MutualSSLAuthenticationMqttConnectionInfo implements MqttConnection
   private final String m_brokerUrl;
   private final MqttConnectOptions m_mqttConnectOptions;
   private final String m_clientId;
+  private static Logger logger =
+      Logger.getLogger(MutualSSLAuthenticationMqttConnectionInfo.class.getName());
 
   public MutualSSLAuthenticationMqttConnectionInfo(
       String brokerUrl, String astarteRealm, String deviceId, SSLSocketFactory sslSocketFactory) {
@@ -22,7 +25,7 @@ public class MutualSSLAuthenticationMqttConnectionInfo implements MqttConnection
     try {
       m_mqttConnectOptions.setSocketFactory(sslSocketFactory);
     } catch (Exception e) {
-      e.printStackTrace();
+      logger.severe("Error while setting socket factory: " + e.getMessage());
     }
     m_clientId = astarteRealm + "/" + deviceId;
   }

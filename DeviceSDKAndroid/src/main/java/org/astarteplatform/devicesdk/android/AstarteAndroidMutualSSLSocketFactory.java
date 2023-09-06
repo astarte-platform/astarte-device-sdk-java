@@ -1,5 +1,6 @@
 package org.astarteplatform.devicesdk.android;
 
+import android.util.Log;
 import java.io.IOException;
 import java.net.InetAddress;
 import java.net.Socket;
@@ -20,6 +21,7 @@ import javax.net.ssl.X509ExtendedKeyManager;
 
 class AstarteAndroidMutualSSLSocketFactory extends SSLSocketFactory {
   private SSLSocketFactory internalSSLSocketFactory;
+  private static final String TAG = "AndroidMutSSLSocketFact";
 
   public AstarteAndroidMutualSSLSocketFactory()
       throws KeyManagementException, NoSuchAlgorithmException, CertificateException,
@@ -54,7 +56,7 @@ class AstarteAndroidMutualSSLSocketFactory extends SSLSocketFactory {
                   (X509Certificate) androidKeyStore.getCertificate("AstarteTrustedCertificate");
               return new X509Certificate[] {signedClientCertificate};
             } catch (Exception e) {
-              e.printStackTrace();
+              Log.e(TAG, "Error while retrieving the certificate chain: ", e);
             }
             return null;
           }
@@ -144,7 +146,7 @@ class AstarteAndroidMutualSSLSocketFactory extends SSLSocketFactory {
     try {
       socket.setReuseAddress(false);
     } catch (Exception e) {
-      e.printStackTrace();
+      Log.e(TAG, "Error while setting socket reuse address: ", e);
     }
     return socket;
   }

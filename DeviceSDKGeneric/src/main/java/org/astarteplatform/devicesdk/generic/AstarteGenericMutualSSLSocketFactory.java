@@ -15,6 +15,7 @@ import java.security.PrivateKey;
 import java.security.cert.Certificate;
 import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
+import java.util.logging.Logger;
 import javax.net.ssl.KeyManager;
 import javax.net.ssl.SSLContext;
 import javax.net.ssl.SSLSocket;
@@ -25,6 +26,8 @@ import javax.net.ssl.X509ExtendedKeyManager;
 class AstarteGenericMutualSSLSocketFactory extends SSLSocketFactory {
   private SSLSocketFactory internalSSLSocketFactory;
   private AstarteGenericCryptoStore mCryptoStore;
+  private static Logger logger =
+      Logger.getLogger(AstarteGenericMutualSSLSocketFactory.class.getName());
 
   public AstarteGenericMutualSSLSocketFactory(AstarteGenericCryptoStore cryptoStore)
       throws KeyManagementException, NoSuchAlgorithmException, CertificateException,
@@ -142,7 +145,7 @@ class AstarteGenericMutualSSLSocketFactory extends SSLSocketFactory {
     try {
       socket.setReuseAddress(false);
     } catch (Exception e) {
-      e.printStackTrace();
+      logger.severe("Error while setting socket reuse address: " + e.getMessage());
     }
     return socket;
   }

@@ -1,6 +1,7 @@
 package org.astarteplatform.devicesdk.transport;
 
 import java.util.Map;
+import java.util.logging.Logger;
 import org.astarteplatform.devicesdk.AstarteDevice;
 import org.astarteplatform.devicesdk.AstarteMessageListener;
 import org.astarteplatform.devicesdk.AstartePropertyStorage;
@@ -14,6 +15,7 @@ import org.astarteplatform.devicesdk.protocol.AstarteProtocolType;
 public abstract class AstarteTransport implements AstarteProtocol {
   private final AstarteProtocolType m_astarteProtocolType;
   private AstarteDevice mDevice;
+  private static Logger logger = Logger.getLogger(AstarteTransport.class.getName());
   protected boolean m_introspectionSent;
   protected AstartePropertyStorage m_propertyStorage;
   protected AstarteFailedMessageStorage m_failedMessageStorage;
@@ -94,7 +96,7 @@ public abstract class AstarteTransport implements AstarteProtocol {
     if (m_propertyStorage != null) {
       m_propertyStorage.setStoredValue(interfaceName, path, value);
     } else {
-      System.err.println("Property storage invalid! Caching won't work");
+      logger.severe("Property storage invalid! Caching won't work");
     }
   }
 
@@ -103,7 +105,7 @@ public abstract class AstarteTransport implements AstarteProtocol {
     if (m_propertyStorage != null) {
       m_propertyStorage.removeStoredPath(interfaceName, path);
     } else {
-      System.err.println("Property storage invalid! Caching won't work");
+      logger.severe("Property storage invalid! Caching won't work");
     }
   }
 }

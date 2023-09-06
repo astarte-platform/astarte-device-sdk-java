@@ -1,11 +1,9 @@
 package org.astarteplatform.devicesdk;
 
+import java.util.logging.Logger;
 import org.astarteplatform.devicesdk.crypto.AstarteCryptoException;
 import org.astarteplatform.devicesdk.crypto.AstarteCryptoStore;
-import org.astarteplatform.devicesdk.protocol.AstarteInterface;
-import org.astarteplatform.devicesdk.protocol.AstarteInterfaceAlreadyPresentException;
-import org.astarteplatform.devicesdk.protocol.AstarteInterfaceNotFoundException;
-import org.astarteplatform.devicesdk.protocol.AstarteInvalidInterfaceException;
+import org.astarteplatform.devicesdk.protocol.*;
 import org.astarteplatform.devicesdk.transport.AstarteFailedMessageStorage;
 import org.astarteplatform.devicesdk.transport.AstarteTransport;
 import org.astarteplatform.devicesdk.transport.AstarteTransportEventListener;
@@ -21,6 +19,7 @@ public abstract class AstartePairableDevice extends AstarteDevice
   private boolean mInitialized;
   private boolean mExplicitDisconnectionRequest;
   private java.util.Timer mReconnectTimer;
+  private static Logger logger = Logger.getLogger(AstartePairableDevice.class.getName());
 
   protected AstartePairableDevice(
       AstartePairingHandler pairingHandler,
@@ -127,7 +126,7 @@ public abstract class AstartePairableDevice extends AstarteDevice
       try {
         mAstarteTransport.connect();
       } catch (AstarteCryptoException e) {
-        System.err.println("Regenerating the cert");
+        logger.info("Regenerating the cert");
         // Generate the certificate and try again
         try {
           mPairingHandler.requestNewCertificate();
@@ -189,7 +188,7 @@ public abstract class AstartePairableDevice extends AstarteDevice
       if (mAstarteMessageListener != null) {
         mAstarteMessageListener.onFailure(cause);
       } else {
-        cause.printStackTrace();
+        logger.severe("Transport Connection Initialization Error: " + cause.getMessage());
       }
 
       // Disconnect and reconnect in a separate thread since we can't call
@@ -206,7 +205,7 @@ public abstract class AstartePairableDevice extends AstarteDevice
                     }
                   } catch (AstarteTransportException e) {
                     // Not much that we can do here, we are reconnecting below
-                    e.printStackTrace();
+                    logger.severe("Error while disconnecting: " + e.getMessage());
                   }
                   eventuallyReconnect();
                 }
@@ -219,7 +218,7 @@ public abstract class AstartePairableDevice extends AstarteDevice
   public void onTransportConnectionError(Throwable cause) {
     synchronized (this) {
       if (cause instanceof AstarteCryptoException) {
-        System.err.println("Regenerating the cert");
+        logger.info("Regenerating the cert");
         // Generate the certificate and try again
         try {
           mPairingHandler.requestNewCertificate();
@@ -228,7 +227,7 @@ public abstract class AstartePairableDevice extends AstarteDevice
         } catch (AstartePairingException e) {
           if (!eventuallyReconnect()) {
             mAstarteMessageListener.onFailure(e);
-            e.printStackTrace();
+            logger.severe("Error while reconnecting: " + e.getMessage());
           }
           return;
         }
@@ -241,7 +240,7 @@ public abstract class AstartePairableDevice extends AstarteDevice
           if (mAstarteMessageListener != null) {
             mAstarteMessageListener.onFailure(e);
           } else {
-            e.printStackTrace();
+            logger.severe("Error while reconnecting: " + e.getMessage());
           }
         }
       } else {

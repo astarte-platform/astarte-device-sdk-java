@@ -1,5 +1,6 @@
 package org.astarteplatform.devicesdk.protocol;
 
+import java.util.logging.Logger;
 import org.astarteplatform.devicesdk.AstartePropertyStorage;
 import org.astarteplatform.devicesdk.AstartePropertyStorageException;
 import org.astarteplatform.devicesdk.transport.AstarteTransport;
@@ -10,6 +11,8 @@ public class AstarteDevicePropertyInterface extends AstartePropertyInterface
   AstarteDevicePropertyInterface(AstartePropertyStorage propertyStorage) {
     super(propertyStorage);
   }
+
+  private static Logger logger = Logger.getLogger(AstarteDevicePropertyInterface.class.getName());
 
   @Override
   public void setProperty(String path, Object payload)
@@ -28,7 +31,8 @@ public class AstarteDevicePropertyInterface extends AstartePropertyInterface
       try {
         storedValue = mPropertyStorage.getStoredValue(this, path);
       } catch (AstartePropertyStorageException e) {
-        e.printStackTrace();
+        logger.severe(
+            "Error while retrieving stored value for path: " + path + ". " + e.getMessage());
       }
     }
 
