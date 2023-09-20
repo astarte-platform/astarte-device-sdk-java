@@ -9,11 +9,7 @@ public class MutualSSLAuthenticationMqttConnectionInfo implements MqttConnection
   private final String m_clientId;
 
   public MutualSSLAuthenticationMqttConnectionInfo(
-      String brokerUrl,
-      String astarteRealm,
-      String deviceId,
-      SSLSocketFactory sslSocketFactory,
-      boolean ignoreSSLErrors) {
+      String brokerUrl, String astarteRealm, String deviceId, SSLSocketFactory sslSocketFactory) {
     m_brokerUrl = brokerUrl;
     m_mqttConnectOptions = new MqttConnectOptions();
     m_mqttConnectOptions.setConnectionTimeout(60);
@@ -27,9 +23,6 @@ public class MutualSSLAuthenticationMqttConnectionInfo implements MqttConnection
       m_mqttConnectOptions.setSocketFactory(sslSocketFactory);
     } catch (Exception e) {
       e.printStackTrace();
-    }
-    if (ignoreSSLErrors) {
-      m_mqttConnectOptions.setHttpsHostnameVerificationEnabled(false);
     }
     m_clientId = astarteRealm + "/" + deviceId;
   }

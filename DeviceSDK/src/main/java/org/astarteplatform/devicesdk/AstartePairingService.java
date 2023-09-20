@@ -105,10 +105,7 @@ public final class AstartePairingService {
   }
 
   protected List<AstarteTransport> reloadTransports(
-      String credentialSecret,
-      AstarteCryptoStore cryptoStore,
-      String deviceId,
-      boolean ignoreSSLErrors)
+      String credentialSecret, AstarteCryptoStore cryptoStore, String deviceId)
       throws AstartePairingException {
     // Build the request URL for Astarte MQTT v1
     HttpUrl requestUrl;
@@ -164,8 +161,7 @@ public final class AstartePairingService {
                 m_astarteRealm,
                 deviceId,
                 transportObjects.getJSONObject(key),
-                cryptoStore,
-                ignoreSSLErrors);
+                cryptoStore);
         transports.add(supportedTransport);
       } catch (Exception e) {
         e.printStackTrace();

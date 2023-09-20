@@ -28,31 +28,10 @@ public class AstarteGenericDevice extends AstartePairableDevice {
         credentialSecret,
         interfaceProvider,
         pairingBaseUrl,
-        connectionSource,
-        false);
-  }
-
-  public AstarteGenericDevice(
-      String deviceId,
-      String astarteRealm,
-      String credentialSecret,
-      AstarteInterfaceProvider interfaceProvider,
-      String pairingBaseUrl,
-      ConnectionSource connectionSource,
-      boolean ignoreSSLErrors)
-      throws JSONException, AstarteInvalidInterfaceException, AstartePropertyStorageException,
-          SQLException {
-    this(
-        deviceId,
-        astarteRealm,
-        credentialSecret,
-        interfaceProvider,
-        pairingBaseUrl,
         new AstarteGenericPropertyStorage(
             DaoManager.createDao(connectionSource, AstarteGenericPropertyEntry.class)),
         new AstarteGenericFailedMessageStorage(
-            DaoManager.createDao(connectionSource, AstarteGenericFailedMessage.class)),
-        ignoreSSLErrors);
+            DaoManager.createDao(connectionSource, AstarteGenericFailedMessage.class)));
   }
 
   public AstarteGenericDevice(
@@ -62,8 +41,7 @@ public class AstarteGenericDevice extends AstartePairableDevice {
       AstarteInterfaceProvider interfaceProvider,
       String pairingBaseUrl,
       AstartePropertyStorage propertyStorage,
-      AstarteFailedMessageStorage failedMessageStorage,
-      boolean ignoreSSLErrors)
+      AstarteFailedMessageStorage failedMessageStorage)
       throws JSONException, AstarteInvalidInterfaceException {
     super(
         new AstartePairingHandler(
@@ -71,8 +49,7 @@ public class AstarteGenericDevice extends AstartePairableDevice {
             astarteRealm,
             deviceId,
             credentialSecret,
-            new AstarteGenericCryptoStore(),
-            ignoreSSLErrors),
+            new AstarteGenericCryptoStore()),
         propertyStorage,
         failedMessageStorage,
         interfaceProvider);

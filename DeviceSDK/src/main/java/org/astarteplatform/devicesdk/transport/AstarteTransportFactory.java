@@ -1,6 +1,5 @@
 package org.astarteplatform.devicesdk.transport;
 
-import javax.net.ssl.*;
 import org.astarteplatform.devicesdk.crypto.AstarteCryptoStore;
 import org.astarteplatform.devicesdk.protocol.AstarteProtocolType;
 import org.astarteplatform.devicesdk.transport.mqtt.AstarteMqttV1Transport;
@@ -13,8 +12,7 @@ public class AstarteTransportFactory {
       String astarteRealm,
       String deviceId,
       JSONObject protocolData,
-      AstarteCryptoStore cryptoStore,
-      boolean ignoreSSLErrors) {
+      AstarteCryptoStore cryptoStore) {
     switch (protocolType) {
       case ASTARTE_MQTT_V1:
         try {
@@ -24,11 +22,7 @@ public class AstarteTransportFactory {
           }
           return new AstarteMqttV1Transport(
               new MutualSSLAuthenticationMqttConnectionInfo(
-                  brokerUrl,
-                  astarteRealm,
-                  deviceId,
-                  cryptoStore.getSSLSocketFactory(ignoreSSLErrors),
-                  ignoreSSLErrors));
+                  brokerUrl, astarteRealm, deviceId, cryptoStore.getSSLSocketFactory()));
         } catch (Exception e) {
           e.printStackTrace();
           return null;

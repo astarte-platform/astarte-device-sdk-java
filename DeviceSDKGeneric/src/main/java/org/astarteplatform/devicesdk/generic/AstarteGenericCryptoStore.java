@@ -98,11 +98,11 @@ class AstarteGenericCryptoStore implements AstarteCryptoStore {
   }
 
   @Override
-  public SSLSocketFactory getSSLSocketFactory(boolean ignoreSSLErrors)
+  public SSLSocketFactory getSSLSocketFactory()
       throws KeyManagementException, NoSuchAlgorithmException, CertificateException,
           KeyStoreException, IOException {
     if (m_socketFactory == null) {
-      m_socketFactory = new AstarteGenericMutualSSLSocketFactory(this, ignoreSSLErrors);
+      m_socketFactory = new AstarteGenericMutualSSLSocketFactory(this);
     }
 
     return m_socketFactory;
