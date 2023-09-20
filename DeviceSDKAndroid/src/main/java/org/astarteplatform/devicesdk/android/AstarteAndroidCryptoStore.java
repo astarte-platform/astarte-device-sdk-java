@@ -139,10 +139,10 @@ class AstarteAndroidCryptoStore implements AstarteCryptoStore {
   }
 
   @Override
-  public SSLSocketFactory getSSLSocketFactory()
+  public SSLSocketFactory getSSLSocketFactory(boolean ignoreSSLErrors)
       throws KeyManagementException, NoSuchAlgorithmException, CertificateException,
           KeyStoreException, IOException {
-    return new AstarteAndroidMutualSSLSocketFactory();
+    return new AstarteAndroidMutualSSLSocketFactory(ignoreSSLErrors);
   }
 
   private String csrToString(PKCS10CertificationRequest csr) throws IOException {

@@ -21,7 +21,7 @@ public interface AstarteCryptoStore {
 
   String generateCSR(String directoryString) throws IOException, OperatorCreationException;
 
-  SSLSocketFactory getSSLSocketFactory()
+  SSLSocketFactory getSSLSocketFactory(boolean ignoreSSLErrors)
       throws KeyManagementException, NoSuchAlgorithmException, CertificateException,
           KeyStoreException, IOException;
 }
