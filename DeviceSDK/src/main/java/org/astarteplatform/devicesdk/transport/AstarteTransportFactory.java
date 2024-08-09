@@ -5,6 +5,8 @@ import org.astarteplatform.devicesdk.crypto.AstarteCryptoStore;
 import org.astarteplatform.devicesdk.protocol.AstarteProtocolType;
 import org.astarteplatform.devicesdk.transport.mqtt.AstarteMqttV1Transport;
 import org.astarteplatform.devicesdk.transport.mqtt.MutualSSLAuthenticationMqttConnectionInfo;
+import org.astarteplatform.devicesdk.transport.unknown.AstarteUnknownTransport;
+import org.astarteplatform.devicesdk.transport.unknown.UnknownTransportConnectionInfo;
 import org.json.JSONObject;
 
 public class AstarteTransportFactory {
@@ -33,5 +35,10 @@ public class AstarteTransportFactory {
       default:
         return null;
     }
+  }
+
+  public static AstarteUnknownTransport createAstarteUnknownTransport(
+      String astarteRealm, String deviceId) {
+    return new AstarteUnknownTransport(new UnknownTransportConnectionInfo(astarteRealm, deviceId));
   }
 }
