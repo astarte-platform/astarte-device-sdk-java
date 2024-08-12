@@ -6,6 +6,7 @@ import java.nio.charset.Charset;
 import java.security.cert.Certificate;
 import java.security.cert.CertificateFactory;
 import java.security.cert.X509Certificate;
+import java.util.Collections;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
@@ -139,9 +140,16 @@ public final class AstartePairingService {
     } catch (NullPointerException e) {
       throw new AstartePairingException(
           "Null Pointer exception - probably got a wrong payload?", e);
+    } catch (IOException e) {
+      // here it is possible that we couldn't connect because a network problem is blocking us
+      // we will setup an unknown transport to handle data sent by the device and store it locally
+      logger.warning("IOException while calling Pairing API at: " + requestUrl);
+      logger.warning(e.getMessage());
+
+      return Collections.singletonList(
+          AstarteTransportFactory.createAstarteUnknownTransport(m_astarteRealm, deviceId));
     } catch (Exception e) {
-      throw new AstartePairingException(
-          "Failure in calling Pairing API to " + requestUrl.toString(), e);
+      throw new AstartePairingException("Failure in calling Pairing API to " + requestUrl, e);
     }
 
     // Iterate Transports and make them available
