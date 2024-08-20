@@ -3,6 +3,7 @@ package org.astarteplatform.devicesdk.generic;
 import com.j256.ormlite.field.DataType;
 import com.j256.ormlite.field.DatabaseField;
 import com.j256.ormlite.table.DatabaseTable;
+import java.util.concurrent.TimeUnit;
 import org.astarteplatform.devicesdk.transport.AstarteFailedMessage;
 
 @DatabaseTable(tableName = "failed_messages")
@@ -34,7 +35,7 @@ public class AstarteGenericFailedMessage implements AstarteFailedMessage {
   }
 
   public AstarteGenericFailedMessage(String topic, byte[] payload, int qos, int relativeExpiry) {
-    this.absoluteExpiry = System.currentTimeMillis() + relativeExpiry;
+    this.absoluteExpiry = System.currentTimeMillis() + TimeUnit.SECONDS.toMillis(relativeExpiry);
     this.topic = topic;
     this.payload = payload;
     this.qos = qos;
@@ -57,7 +58,11 @@ public class AstarteGenericFailedMessage implements AstarteFailedMessage {
 
   @Override
   public boolean isExpired() {
-    return absoluteExpiry > System.currentTimeMillis();
+    if (absoluteExpiry <= 0) {
+      return false;
+    }
+
+    return absoluteExpiry < System.currentTimeMillis();
   }
 
   public long getStorageId() {

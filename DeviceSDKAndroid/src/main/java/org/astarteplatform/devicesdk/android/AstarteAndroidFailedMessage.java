@@ -4,6 +4,7 @@ import androidx.annotation.NonNull;
 import androidx.room.ColumnInfo;
 import androidx.room.Entity;
 import androidx.room.PrimaryKey;
+import java.util.concurrent.TimeUnit;
 import org.astarteplatform.devicesdk.transport.AstarteFailedMessage;
 
 @Entity(tableName = "failed_messages")
@@ -30,7 +31,7 @@ public class AstarteAndroidFailedMessage implements AstarteFailedMessage {
   }
 
   public AstarteAndroidFailedMessage(String topic, byte[] payload, int qos, int relativeExpiry) {
-    this.absoluteExpiry = System.currentTimeMillis() + relativeExpiry;
+    this.absoluteExpiry = System.currentTimeMillis() + TimeUnit.SECONDS.toMillis(relativeExpiry);
     this.topic = topic;
     this.payload = payload;
     this.qos = qos;
@@ -61,7 +62,11 @@ public class AstarteAndroidFailedMessage implements AstarteFailedMessage {
 
   @Override
   public boolean isExpired() {
-    return absoluteExpiry > System.currentTimeMillis();
+    if (absoluteExpiry <= 0) {
+      return false;
+    }
+
+    return absoluteExpiry < System.currentTimeMillis();
   }
 
   public long getStorageId() {
